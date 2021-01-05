@@ -36,6 +36,7 @@ android {
         noCompress "tflite"
     }
 
+    //noinspection GroovyDocCheck
     defaultConfig {
         signingConfig signingConfigs.debug
         applicationId 'com.qualcomm.ftcrobotcontroller'
@@ -106,5 +107,6 @@ repositories {
     flatDir {
         dirs rootProject.file('libs')
     }
+    jcenter()
 }
 apply from: 'build.release.gradle'
