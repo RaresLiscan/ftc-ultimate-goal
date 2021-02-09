@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
+import java.util.concurrent.TimeUnit;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -21,7 +24,9 @@ public class RobotMap {
     public DcMotor dreaptaSpate = null;
     public DcMotor stangaFata = null;
     public DcMotor dreaptaFata = null;
-    public Servo servoWobble = null;
+    public DcMotor motorShooter = null;
+    public DcMotor motorIntake = null;
+    public Servo servoWobble, servoRidicare, servoIntake = null;
     public BNO055IMU imu = null;
     Orientation lastAngles = new Orientation();
     double globalAngle, correction, prevAngle;
@@ -38,6 +43,10 @@ public class RobotMap {
         stangaSpate = hardwareMap.get(DcMotor.class, "stangaSpate");
         dreaptaSpate = hardwareMap.get(DcMotor.class, "dreaptaSpate");
         servoWobble = hardwareMap.get(Servo.class, "servoWobble");
+        servoRidicare = hardwareMap.get(Servo.class, "servoRidicare");
+        servoIntake = hardwareMap.get(Servo.class, "servoIntake");
+        motorShooter = hardwareMap.get(DcMotor.class, "motorShooter");
+        motorIntake = hardwareMap.get(DcMotor.class, "motorIntake");
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
@@ -57,38 +66,45 @@ public class RobotMap {
     }
 
     public void driveFieldRelativeAngle(double y, double angle) {
-        double angle_in = angle;  // convert to robot coordinates
+        double angle_in = angle + Math.PI;  // convert to robot coordinates
+//        opMode.telemetry.addData("angle_in: ", angle_in);
+//        opMode.telemetry.addData("prevAngle: ", prevAngle);
+//        opMode.telemetry.update();
+
+        double delta = AngleUnit.normalizeRadians(Math.toRadians(getAngle()) - angle_in);
+
+        double MAX_ROTATE = 0.3; //This is to shrink how fast we can rotate so we don't fly past the angle
+//        if (y <= 0.05) {
+//            delta = 0;
+//        }
+//        else {
+////            delta = Range.clip(delta, -MAX_ROTATE, MAX_ROTATE);
+//            delta *= 0.4;
+//        }
+        if (y <= 0.05) {
+            delta = 0;
+        }
+        else if (y < 0.5) {
+            y /= 1.5;
+            delta *= 0.3;
+        }
+        else {
+            delta *= 0.3;
+        }
+        teleOpDrive(y, delta);
+    }
+
+
+
+    public void driveRelativeManualRotation(double y, double angle, double rotationSpeed) {
+        double angle_in = angle + Math.PI/2;  // convert to robot coordinates
 //        opMode.telemetry.addData("Unghi: ", angle);
 //        opMode.telemetry.update();
 
         double delta = AngleUnit.normalizeRadians(Math.toRadians(getAngle()) - angle_in);
 
         double MAX_ROTATE = 1; //This is to shrink how fast we can rotate so we don't fly past the angle
-        if (y <= 0.1) {
-            delta = 0;
-        }
-        else {
-//            delta = Range.clip(delta, -MAX_ROTATE, MAX_ROTATE);
-            delta *= 1.3;
-        }
-        teleOpDrive(y, delta);
-    }
 
-    public void driveRelativeManualRotation(double y, double angle, double rotationSpeed) {
-        double angle_in = angle;  // convert to robot coordinates
-//        opMode.telemetry.addData("Unghi: ", angle);
-//        opMode.telemetry.update();
-
-        double delta = Math.toRadians(getAngle()) - angle_in;
-
-        double MAX_ROTATE = 1; //This is to shrink how fast we can rotate so we don't fly past the angle
-//        if (y <= 0.1) {
-//            delta = 0;
-//        }
-//        else {
-////            delta = Range.clip(delta, -MAX_ROTATE, MAX_ROTATE);
-//            delta *= 1.3;
-//        }
         if (delta <= Math.PI / 4) {
             teleOpDrive(y, rotationSpeed);
         }
@@ -116,41 +132,67 @@ public class RobotMap {
         setSpeeds(frontLeftSpeed, frontRightSpeed, backLeftSpeed, backRightSpeed);
     }
 
-    public void runUsingEncoders(double power, int distance, int timeout) {
+    public void teleOpDriveRotire(double forward,double rotate){
 
+        double frontLeftSpeed = SQRT(0- rotate);
+        double frontRightSpeed = SQRT(0- rotate);
+        double backLeftSpeed = SQRT(0 - rotate);
+        double backRightSpeed = SQRT( 0- rotate);
+
+        setSpeeds(frontLeftSpeed, frontRightSpeed, backLeftSpeed, backRightSpeed);
+    }
+
+    public void runUsingEncoders (int distance, double power, double timeout) {
         ElapsedTime runtime = new ElapsedTime();
 
         stangaSpate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        dreaptaSpate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         stangaFata.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        dreaptaSpate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         dreaptaFata.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        stangaSpate.setTargetPosition(-distance);
-        dreaptaSpate.setTargetPosition(distance);
-        stangaFata.setTargetPosition(-distance);
-        dreaptaFata.setTargetPosition(distance);
+        opMode.sleep(50);
+
+        stangaFata.setTargetPosition(distance);
+        stangaSpate.setTargetPosition(distance);
+        dreaptaFata.setTargetPosition(-distance);
+        dreaptaSpate.setTargetPosition(-distance);
 
         stangaSpate.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        dreaptaSpate.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         stangaFata.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        dreaptaSpate.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         dreaptaFata.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         double p = 0.05;
 
-        stangaSpate.setPower(power);
-        dreaptaSpate.setPower(power);
-        stangaFata.setPower(power);
-        dreaptaFata.setPower(power);
-
+        stangaFata.setPower(p);
+        stangaSpate.setPower(p);
+        dreaptaFata.setPower(p);
+        dreaptaSpate.setPower(p);
 
         runtime.reset();
 
-        while (opMode.opModeIsActive() && stangaSpate.isBusy() && dreaptaSpate.isBusy() && runtime.seconds() < timeout);
-        while (opMode.opModeIsActive() && stangaFata.isBusy() && dreaptaFata.isBusy() && runtime.seconds() < timeout);
+        while (opMode.opModeIsActive() && stangaSpate.isBusy() && stangaFata.isBusy() && dreaptaSpate.isBusy() && dreaptaFata.isBusy() && runtime.seconds() < timeout) {
+            if (p < power) p += 0.05;
+
+            stangaFata.setPower(p);
+            stangaSpate.setPower(p);
+            dreaptaFata.setPower(p);
+            dreaptaSpate.setPower(p);
+
+        }
 
         stopDriving();
 
     }
+
+
+    public void zeroPowerBeh() {
+        stangaSpate.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        stangaFata.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        dreaptaFata.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        dreaptaSpate.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+    }
+
 
     public void resetAngle()
     {
@@ -167,11 +209,11 @@ public class RobotMap {
     public void rotateConstantSpeed(int degrees, double power, int timeout)
     {
 
-        stangaSpate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        dreaptaSpate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        opMode.sleep(300);
+        dreaptaFata.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         stangaFata.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         dreaptaSpate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
+        stangaSpate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         ElapsedTime runtime = new ElapsedTime();
 
@@ -183,10 +225,75 @@ public class RobotMap {
 
         if (degrees < 0)
         {   // turn right.
-            stangaFata.setPower(-power);
-            dreaptaSpate.setPower(power);
-            stangaSpate.setPower(-power);
-            dreaptaFata.setPower(power);
+//            stangaFata.setPower(power);
+//            dreaptaSpate.setPower(-power);
+//            stangaSpate.setPower(power);
+//            dreaptaFata.setPower(-power);
+            power = -power;
+        }
+        else if (degrees > 0)
+        {   // turn left.
+//            stangaFata.setPower(power);
+//            dreaptaSpate.setPower(-power);
+//            stangaSpate.setPower(power);
+//            dreaptaFata.setPower(-power);
+        }
+        else return;
+
+        opMode.telemetry.addData("Motor Mode: ", dreaptaFata.getMode());
+        opMode.telemetry.addData("Other motor mode: ", dreaptaSpate.getMode());
+        opMode.telemetry.update();
+        opMode.sleep(5000);
+
+
+        // set power to rotate.
+        stangaFata.setPower(power);
+        dreaptaFata.setPower(power);
+        stangaSpate.setPower(power);
+        dreaptaSpate.setPower(power);
+
+        // rotate until turn is completed.
+        if (degrees < 0)
+        {
+
+            while (opMode.opModeIsActive() && getAngle() > degrees) {}
+        }
+        else    // left turn.
+            while (opMode.opModeIsActive() && getAngle() < degrees) {}
+
+        // turn the motors off.
+        stopDriving();
+        //        rightMotor.setPower(0);
+        //        leftMotor.setPower(0);
+
+        // wait for rotation to stop.
+        opMode.sleep(200);
+        // reset angle tracking on new heading.
+        resetAngle();
+    }
+
+    public void rotate(int degrees, double power, int timeout)
+    {
+
+        stangaSpate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        dreaptaSpate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        stangaFata.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        dreaptaSpate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        ElapsedTime runtime = new ElapsedTime();
+
+        // restart imu movement tracking.
+        resetAngle();
+
+        // getAngle() returns + when rotating counter clockwise (left) and - when rotating
+        // clockwise (right).
+
+        if (degrees < 0)
+        {   // turn right.
+            stangaFata.setPower(power);
+            dreaptaSpate.setPower(-power);
+            stangaSpate.setPower(power);
+            dreaptaFata.setPower(-power);
             power = -power;
         }
         else if (degrees > 0)
@@ -212,15 +319,36 @@ public class RobotMap {
         //        rightMotor.setPower(rightPower);
 
         // rotate until turn is completed.
+        boolean powerModified = false;
         if (degrees < 0)
         {
             // On right turn we have to get off zero first.
-            while (opMode.opModeIsActive() && getAngle() == 0) { }
+            while (opMode.opModeIsActive() && getAngle() == 0 && runtime.seconds() < timeout) { }
 
-            while (opMode.opModeIsActive() && getAngle() > degrees) {}
+            while (opMode.opModeIsActive() && getAngle() > degrees && runtime.seconds() < timeout) {
+//                if (getAngle() - degrees < 30 && !powerModified) {
+//                    //lower the power in order to rotate with more precision
+//                    power /= 2;
+//                    stangaFata.setPower(power);
+//                    dreaptaFata.setPower(power);
+//                    stangaSpate.setPower(power);
+//                    dreaptaSpate.setPower(power);
+//                    powerModified = true;
+//                }
+            }
         }
         else    // left turn.
-            while (opMode.opModeIsActive() && getAngle() < degrees) {}
+            while (opMode.opModeIsActive() && getAngle() < degrees && runtime.seconds() < timeout) {
+//                if (degrees - getAngle() < 30 && !powerModified) {
+//                    //lower the power in order to rotate with more precision
+//                    power /= 2;
+//                    stangaFata.setPower(power);
+//                    dreaptaFata.setPower(power);
+//                    stangaSpate.setPower(power);
+//                    dreaptaSpate.setPower(power);
+//                    powerModified = true;
+//                }
+            }
 
         // turn the motors off.
         stopDriving();
@@ -230,7 +358,7 @@ public class RobotMap {
         // wait for rotation to stop.
 
         // reset angle tracking on new heading.
-        resetAngle();
+//        resetAngle();
     }
 
     public double getHeading(AngleUnit angleUnit) {
@@ -239,6 +367,22 @@ public class RobotMap {
         angles = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.RADIANS);
 
         return angleUnit.fromRadians(angles.firstAngle + imuOffset);
+    }
+
+    public double getCurrentAngle() {
+        Orientation angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double currentAngle = angle.firstAngle;
+        if (currentAngle < -180) {
+            while (currentAngle < -180) {
+                currentAngle += 360;
+            }
+        }
+        else {
+            while (currentAngle > 180) {
+                currentAngle -= 360;
+            }
+        }
+        return currentAngle;
     }
 
     public double getAngle()
@@ -270,4 +414,6 @@ public class RobotMap {
         stangaFata.setPower(0);
         dreaptaFata.setPower(0);
     }
+
+
 }

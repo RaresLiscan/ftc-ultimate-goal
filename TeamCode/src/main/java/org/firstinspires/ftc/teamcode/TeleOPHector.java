@@ -13,6 +13,8 @@ public class TeleOPHector extends LinearOpMode {
 
     private RobotMap robot = null;
 
+    double  contPower;
+
 
 
     @Override
@@ -22,6 +24,7 @@ public class TeleOPHector extends LinearOpMode {
         robot = new RobotMap(hardwareMap, this);
         waitForStart();
         runtime.reset();
+
 
         while (opModeIsActive()) {
 
@@ -49,14 +52,32 @@ public class TeleOPHector extends LinearOpMode {
             telemetry.update();
 
 
-            if (gamepad1.x){
+
+            // Prindere wobble
+            if (gamepad1.dpad_left){
                 robot.servoWobble.setPosition(1);
-
             }
-            else if (gamepad1.x && robot.servoWobble.getPosition() != 1) {
+            else if (gamepad1.dpad_right){
                 robot.servoWobble.setPosition(0);
-
             }
+
+
+
+            // Servo loader
+            if (gamepad1.left_bumper != false) {
+                //robot.servoIntake.setPower(1);
+            }
+            else //robot.servoIntake.setPower(0);
+
+
+                // Motor shooter
+                if (gamepad1.y){
+                    robot.motorShooter.setPower(1);
+                }
+                else if(gamepad1.a){
+                    robot.motorShooter.setPower(0);
+                }
+
 
         }
     }

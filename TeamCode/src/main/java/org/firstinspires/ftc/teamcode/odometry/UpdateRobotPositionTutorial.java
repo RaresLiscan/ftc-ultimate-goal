@@ -1,12 +1,14 @@
 package org.firstinspires.ftc.teamcode.odometry;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp
+@Disabled
 public class UpdateRobotPositionTutorial extends LinearOpMode {
 
     DcMotor frontLeft, frontRight, backLeft, backRight;
