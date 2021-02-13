@@ -46,7 +46,7 @@ public class TeleOpSuprem extends LinearOpMode {
 
 
             // Prindere wobble
-            if (gamepad1.dpad_right){
+            if (gamepad1.dpad_right){//il lasa
                 robot.servoWobble.setPosition(1);
             }
             else if (gamepad1.dpad_left){

@@ -1,24 +1,3 @@
-/*
- * Copyright (c) 2020 OpenFTC Team
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.dashboard.FtcDashboard;
@@ -26,7 +5,6 @@ import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
@@ -39,25 +17,29 @@ import org.opencv.imgproc.Imgproc;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
 import org.openftc.easyopencv.OpenCvPipeline;
-import org.openftc.easyopencv.OpenCvWebcam;
 
 @Config
-@Autonomous(name="Autonomie finala")
-public class EasyOpenCvTesting extends LinearOpMode
-{
+@Autonomous(name="Auto Demo Royals")
+@Disabled
+public class AutoRoyals extends LinearOpMode {
+
+    private RobotMap robot = null;
+
+    private final double TOWER_GOAL_HEIGHT = 0.61;
+    private final double POWER_SHOT_HEIGHT = 0.7;
+
+    FtcDashboard dashboard;
+    Telemetry dashboardTelemetry;
+
+
     OpenCvCamera webcam;
-    SkystoneDeterminationPipeline pipeline;
-    private RobotMap robot;
+    AutoRoyals.SkystoneDeterminationPipeline pipeline;
 
     /*
      * The core values which define the location and size of the sample regions
      */
     public static Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(180,150);
-
-    FtcDashboard dashboard;
-    Telemetry dashboardTelemetry;
 
     public static int REGION_WIDTH = 45;
     public static int REGION_HEIGHT = 35;
@@ -65,31 +47,22 @@ public class EasyOpenCvTesting extends LinearOpMode
     public static int FOUR_RING_THRESHOLD = 143;
     public static int ONE_RING_THRESHOLD = 135;
 
-    private final double TOWER_GOAL_HEIGHT = 0.61;
-    private final double POWER_SHOT_HEIGHT = 0.7;
-
     @Override
-    public void runOpMode()
-    {
+    public void runOpMode() throws InterruptedException {
+
+        dashboard = FtcDashboard.getInstance();
+//        dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
+
         robot = new RobotMap(hardwareMap, this);
         robot.servoWobble.setPosition(0);
         robot.ridicareShooter.setPosition(POWER_SHOT_HEIGHT);
         robot.servoIntake.setPosition(0.5);
         robot.zeroPowerBeh();
 
-        dashboard = FtcDashboard.getInstance();
-        dashboardTelemetry = FtcDashboard.getInstance().getTelemetry();
-
         int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
         webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
-        pipeline = new SkystoneDeterminationPipeline();
+        pipeline = new AutoRoyals.SkystoneDeterminationPipeline();
         webcam.setPipeline(pipeline);
-
-
-        // We set the viewport policy to optimized view so the preview doesn't appear 90 deg
-        // out when the RC activity is in portrait. We do our actual image processing assuming
-        // landscape orientation, though.
-//        webcam.setViewportRenderingPolicy(OpenCvCamera.ViewportRenderingPolicy.OPTIMIZE_VIEW);
 
         webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
@@ -101,36 +74,39 @@ public class EasyOpenCvTesting extends LinearOpMode
             }
         });
 
-        while (!opModeIsActive() && !isStopRequested()) {
-            dashboardTelemetry.addData("Analysis", pipeline.getAnalysis());
-            dashboardTelemetry.addData("Position", pipeline.position);
-            dashboardTelemetry.update();
-        }
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                webcam.startStreaming(320,240, OpenCvCameraRotation.UPRIGHT);
+                dashboard.startCameraStream(webcam, 0);
+            }
+        });
 
         waitForStart();
 
-        if (opModeIsActive())
-        {
 
-//            pipeline.updateRegions();
-//
-//            dashboardTelemetry.addData("Analysis", pipeline.getAnalysis());
-//            dashboardTelemetry.addData("Position", pipeline.position);
-//            dashboardTelemetry.update();
-//
-//            // Don't burn CPU cycles busy-looping in this sample
-//            sleep(50);
+        if (opModeIsActive()) {
 
-            if (pipeline.position == SkystoneDeterminationPipeline.RingPosition.FOUR) {
-                FourRings();
-            }
-            else if (pipeline.position == SkystoneDeterminationPipeline.RingPosition.ONE) {
-                OneRing();
-            }
-            else if (pipeline.position == SkystoneDeterminationPipeline.RingPosition.NONE) {
-                NoRing();
-            }
+            telemetry.addData("Analysis", pipeline.getAnalysis());
+            telemetry.addData("Position", pipeline.position);
+            telemetry.update();
+            sleep(500);
+
+
+//            if (pipeline.position == SkystoneDeterminationPipeline.RingPosition.FOUR) {
+//                FourRings();
+//            }
+//            else if (pipeline.position == SkystoneDeterminationPipeline.RingPosition.ONE) {
+//                OneRing();
+//            }
+//            else if (pipeline.position == SkystoneDeterminationPipeline.RingPosition.NONE) {
+//                NoRing();
+//            }
+
         }
+
     }
 
     private void FourRings() {
@@ -458,4 +434,6 @@ public class EasyOpenCvTesting extends LinearOpMode
             return avg1;
         }
     }
+
 }
+

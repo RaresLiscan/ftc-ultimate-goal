@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.sax.StartElementListener;
+
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -16,6 +18,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 
+import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.normalizeRadians;
 
 
 public class RobotMap {
@@ -27,6 +30,7 @@ public class RobotMap {
     public DcMotor motorShooter = null;
     public DcMotor motorIntake = null;
     public Servo servoWobble, servoRidicare, servoIntake = null;
+    public Servo ridicareShooter = null;
     public BNO055IMU imu = null;
     Orientation lastAngles = new Orientation();
     double globalAngle, correction, prevAngle;
@@ -47,6 +51,7 @@ public class RobotMap {
         servoIntake = hardwareMap.get(Servo.class, "servoIntake");
         motorShooter = hardwareMap.get(DcMotor.class, "motorShooter");
         motorIntake = hardwareMap.get(DcMotor.class, "motorIntake");
+        ridicareShooter = hardwareMap.servo.get("ridicareShooter");
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
@@ -65,13 +70,33 @@ public class RobotMap {
         this.opMode = opMode;
     }
 
+    public void driveFieldRelative3(double x, double y, double rotate) {
+
+        double r = Math.sqrt(x * x + y * y);
+        double alfa = Math.toRadians(getAngle());
+
+        double delta = alfa - Math.atan2(y, x);
+
+        double deltaPrim = normalizeRadians(alfa + Math.PI) - Math.atan2(y, x);
+
+        opMode.telemetry.addData("Alpha: ", alfa);
+        opMode.telemetry.addData("Delta: ", delta);
+        opMode.telemetry.addData("Delta prim: ", deltaPrim);
+        opMode.telemetry.update();
+
+        if(Math.abs(delta)<=Math.PI/4)
+            teleOpDrive(r,rotate);
+        if(Math.abs(deltaPrim)<=Math.PI/4)
+            teleOpDrive(-r,rotate);
+    }
+
     public void driveFieldRelativeAngle(double y, double angle) {
         double angle_in = angle + Math.PI;  // convert to robot coordinates
 //        opMode.telemetry.addData("angle_in: ", angle_in);
 //        opMode.telemetry.addData("prevAngle: ", prevAngle);
 //        opMode.telemetry.update();
 
-        double delta = AngleUnit.normalizeRadians(Math.toRadians(getAngle()) - angle_in);
+        double delta = normalizeRadians(Math.toRadians(getAngle()) - angle_in);
 
         double MAX_ROTATE = 0.3; //This is to shrink how fast we can rotate so we don't fly past the angle
 //        if (y <= 0.05) {
@@ -101,7 +126,7 @@ public class RobotMap {
 //        opMode.telemetry.addData("Unghi: ", angle);
 //        opMode.telemetry.update();
 
-        double delta = AngleUnit.normalizeRadians(Math.toRadians(getAngle()) - angle_in);
+        double delta = normalizeRadians(Math.toRadians(getAngle()) - angle_in);
 
         double MAX_ROTATE = 1; //This is to shrink how fast we can rotate so we don't fly past the angle
 
@@ -185,6 +210,61 @@ public class RobotMap {
 
     }
 
+    //Used for robot travels longer than 2500 ticks
+    public void runUsingEncodersLongRun (int distance, double power, double timeout) {
+        ElapsedTime runtime = new ElapsedTime();
+
+        stangaSpate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        stangaFata.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        dreaptaSpate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        dreaptaFata.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        opMode.sleep(50);
+
+        stangaFata.setTargetPosition(distance);
+        stangaSpate.setTargetPosition(distance);
+        dreaptaFata.setTargetPosition(-distance);
+        dreaptaSpate.setTargetPosition(-distance);
+
+        stangaSpate.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        stangaFata.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        dreaptaSpate.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        dreaptaFata.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        double p = 0.05;
+
+        stangaFata.setPower(p);
+        stangaSpate.setPower(p);
+        dreaptaFata.setPower(p);
+        dreaptaSpate.setPower(p);
+
+        runtime.reset();
+
+        boolean accelerate = true;
+
+        while (opMode.opModeIsActive() && stangaSpate.isBusy() && stangaFata.isBusy() && dreaptaSpate.isBusy() && dreaptaFata.isBusy() && runtime.seconds() < timeout) {
+            if (p < power && accelerate) p += 0.01;
+
+            stangaFata.setPower(p);
+            stangaSpate.setPower(p);
+            dreaptaFata.setPower(p);
+            dreaptaSpate.setPower(p);
+
+            if (Math.abs(distance - stangaSpate.getCurrentPosition()) < 1400 && accelerate) {
+                p /= 2;
+                accelerate = false;
+            }
+
+        }
+
+        stopDriving();
+
+    }
+
+    public int cmToTicks(double cm) {
+        return (int)(cm / (Math.PI * 10) * 1120);
+    }
+
 
     public void zeroPowerBeh() {
         stangaSpate.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -239,11 +319,6 @@ public class RobotMap {
 //            dreaptaFata.setPower(-power);
         }
         else return;
-
-        opMode.telemetry.addData("Motor Mode: ", dreaptaFata.getMode());
-        opMode.telemetry.addData("Other motor mode: ", dreaptaSpate.getMode());
-        opMode.telemetry.update();
-        opMode.sleep(5000);
 
 
         // set power to rotate.
@@ -379,6 +454,22 @@ public class RobotMap {
         }
         else {
             while (currentAngle > 180) {
+                currentAngle -= 360;
+            }
+        }
+        return currentAngle;
+    }
+
+    public double get360Angle() {
+        Orientation angle = imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES);
+        double currentAngle = angle.firstAngle;
+        if (currentAngle <= -360) {
+            while (currentAngle < -360) {
+                currentAngle += 360;
+            }
+        }
+        else if (currentAngle >= 360) {
+            while (currentAngle > 360) {
                 currentAngle -= 360;
             }
         }
