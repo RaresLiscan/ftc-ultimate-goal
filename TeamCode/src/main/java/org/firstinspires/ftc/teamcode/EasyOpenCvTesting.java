@@ -73,7 +73,7 @@ public class EasyOpenCvTesting extends LinearOpMode
     {
         robot = new RobotMap(hardwareMap, this);
         robot.servoWobble.setPosition(0);
-        robot.ridicareShooter.setPosition(POWER_SHOT_HEIGHT);
+        robot.ridicareShooter.setPosition(TOWER_GOAL_HEIGHT);
         robot.servoIntake.setPosition(0.5);
         robot.zeroPowerBeh();
 
@@ -133,74 +133,69 @@ public class EasyOpenCvTesting extends LinearOpMode
         }
     }
 
-    private void FourRings() {
-
+    private void startAndShoot() {
         //Porneste motoarele
-        robot.servoRidicare.setPosition(0.8);
+//        robot.servoRidicare.setPosition(0.8);
         robot.motorShooter.setPower(1);
 
         //Se pozitioneaza la tragere
         robot.runUsingEncodersLongRun(robot.cmToTicks(160), 1, 3);
-        robot.rotateConstantSpeed(2, 0.3, 2);
 
-        //Trage primul ring
+
+        //Se pozitioneaza la tower goal
+        robot.ridicareShooter.setPosition(TOWER_GOAL_HEIGHT);
+        robot.rotateConstantSpeed(-9, 0.3, 3);
+
         robot.servoIntake.setPosition(1);
         sleep(350);
         robot.servoIntake.setPosition(0.5);
-
-        //Se pozitioneaza la power shot-ul din stanga
-        robot.ridicareShooter.setPosition(POWER_SHOT_HEIGHT + 0.04);
-        robot.rotateConstantSpeed(9, 0.3, 2);
-        sleep(100);
-
-        //Trage al doilea ring
+        sleep(350);
+        robot.servoIntake.setPosition(1);
+        sleep(350);
+        robot.servoIntake.setPosition(0.5);
+        sleep(350);
         robot.servoIntake.setPosition(1);
         sleep(350);
         robot.servoIntake.setPosition(0.5);
         sleep(150);
-
-        //Se pozitioneaza la tower goal
-        robot.ridicareShooter.setPosition(TOWER_GOAL_HEIGHT);
-        robot.rotateConstantSpeed(-23, 0.3, 3);
-
-        //Trage al trilea ring
-        robot.servoIntake.setPosition(1);
-        sleep(350);
-        robot.servoIntake.setPosition(0.5);
-
         //Opreste shooterul
         robot.motorShooter.setPower(0);
+    }
 
+    private void FourRings() {
+
+
+        startAndShoot();
         //Se pozitioneaza pentru wobble si il duce
-        robot.rotateConstantSpeed(-14, 0.4, 2);
+        robot.rotateConstantSpeed(-12, 0.4, 2);
         robot.runUsingEncodersLongRun(robot.cmToTicks(160), 1, 5);
 
         //lasa primul wobble
         robot.servoWobble.setPosition(0.8);
-        robot.servoRidicare.setPosition(1);
+//        robot.servoRidicare.setPosition(1);
         sleep(500);
 
         //Se intoarce dupa al doilea
-        robot.runUsingEncoders(robot.cmToTicks(-25), 1, 2);
-        robot.rotateConstantSpeed(-143, 0.4, 3);
+        robot.runUsingEncoders(robot.cmToTicks(-50), 1, 5);
+        robot.rotateConstantSpeed(-139, 0.4, 3);
         //Se duce dupa al doilea
-        robot.runUsingEncodersLongRun(robot.cmToTicks(250),1,7);
+        robot.runUsingEncodersLongRun(robot.cmToTicks(230),1,7);
 
         //Prinde al doilea wobble
         robot.servoWobble.setPosition(0);
         sleep(500);
-        robot.servoRidicare.setPosition(0.8);
+//        robot.servoRidicare.setPosition(0.8);
 
         //Se intoarce catre patrat
-        robot.rotateConstantSpeed(165, 0.65, 5);
+        robot.rotateConstantSpeed(168, 0.4, 5);
 
         //Duce al doilea wobble
-        robot.runUsingEncodersLongRun(robot.cmToTicks(247),1,7);
+        robot.runUsingEncodersLongRun(robot.cmToTicks(262),1,7);
 
 
         //Lasa al doilea wobble
         robot.servoWobble.setPosition(0.8);
-        robot.servoRidicare.setPosition(1);
+//        robot.servoRidicare.setPosition(1);
         sleep(500);
 
         //Parcheaza
@@ -209,41 +204,7 @@ public class EasyOpenCvTesting extends LinearOpMode
 
     private void NoRing(){
 
-        //Porneste motoarele
-        robot.servoRidicare.setPosition(0.8);
-        robot.motorShooter.setPower(1);
-
-        //Se pozitioneaza la tragere
-        robot.runUsingEncodersLongRun(robot.cmToTicks(160), 1, 3);
-        robot.rotateConstantSpeed(2, 0.3, 2);
-
-        //Trage primul ring
-        robot.servoIntake.setPosition(1);
-        sleep(350);
-        robot.servoIntake.setPosition(0.5);
-
-        //Se pozitioneaza la power shot-ul din stanga
-        robot.ridicareShooter.setPosition(POWER_SHOT_HEIGHT + 0.04);
-        robot.rotateConstantSpeed(9, 0.3, 2);
-        sleep(100);
-
-        //Trage al doilea ring
-        robot.servoIntake.setPosition(1);
-        sleep(350);
-        robot.servoIntake.setPosition(0.5);
-        sleep(150);
-
-        //Se pozitioneaza la tower goal
-        robot.ridicareShooter.setPosition(TOWER_GOAL_HEIGHT);
-        robot.rotateConstantSpeed(-23, 0.3, 3);
-
-        //Trage al trilea ring
-        robot.servoIntake.setPosition(1);
-        sleep(350);
-        robot.servoIntake.setPosition(0.5);
-
-        //Opreste shooterul
-        robot.motorShooter.setPower(0);
+        startAndShoot();
 
         //Se pozitioneaza pentru wobble si il duce
         //robot.runUsingEncoders(robot.cmToTicks(20),1,3);
@@ -252,12 +213,12 @@ public class EasyOpenCvTesting extends LinearOpMode
 
         //lasa primul wobble
         robot.servoWobble.setPosition(0.8);
-        robot.servoRidicare.setPosition(1);
+//        robot.servoRidicare.setPosition(1);
         sleep(500);
 
         //Se intoarce dupa al doilea
         robot.runUsingEncoders(robot.cmToTicks(-25), 1, 2);
-        robot.rotateConstantSpeed(-97, 0.4, 3);
+        robot.rotateConstantSpeed(-95, 0.4, 3);
 
         //Se duce dupa al doilea
         robot.runUsingEncodersLongRun(robot.cmToTicks(140),1,7);
@@ -265,58 +226,28 @@ public class EasyOpenCvTesting extends LinearOpMode
         //Prinde al doilea wobble
         robot.servoWobble.setPosition(0);
         sleep(500);
-        robot.servoRidicare.setPosition(0.8);
+//        robot.servoRidicare.setPosition(0.8);
 
         //Se intoarce catre patrat
         robot.rotateConstantSpeed(160, 0.65, 5);
 
         //Duce al doilea wobble
-        robot.runUsingEncodersLongRun(robot.cmToTicks(140),1,7);
+        robot.runUsingEncodersLongRun(robot.cmToTicks(147),1,7);
 
 
         //Lasa al doilea wobble
         robot.servoWobble.setPosition(0.8);
-        robot.servoRidicare.setPosition(1);
+//        robot.servoRidicare.setPosition(1);
         sleep(500);
+
+        robot.runUsingEncoders(-robot.cmToTicks(30), 1, 3);
+        robot.rotateConstantSpeed(60, 0.4, 3);
+        robot.runUsingEncoders(robot.cmToTicks(45), 1, 3);
 
     }
 
     private void OneRing(){
-        //Porneste motoarele
-        robot.servoRidicare.setPosition(0.8);
-        robot.motorShooter.setPower(1);
-
-        //Se pozitioneaza la tragere
-        robot.runUsingEncodersLongRun(robot.cmToTicks(160), 1, 3);
-        robot.rotateConstantSpeed(2, 0.3, 2);
-
-        //Trage primul ring
-        robot.servoIntake.setPosition(1);
-        sleep(350);
-        robot.servoIntake.setPosition(0.5);
-
-        //Se pozitioneaza la power shot-ul din stanga
-        robot.ridicareShooter.setPosition(POWER_SHOT_HEIGHT + 0.04);
-        robot.rotateConstantSpeed(9, 0.3, 2);
-        sleep(100);
-
-        //Trage al doilea ring
-        robot.servoIntake.setPosition(1);
-        sleep(350);
-        robot.servoIntake.setPosition(0.5);
-        sleep(150);
-
-        //Se pozitioneaza la tower goal
-        robot.ridicareShooter.setPosition(TOWER_GOAL_HEIGHT);
-        robot.rotateConstantSpeed(-23, 0.3, 3);
-
-        //Trage al trilea ring
-        robot.servoIntake.setPosition(1);
-        sleep(350);
-        robot.servoIntake.setPosition(0.5);
-
-        //Opreste shooterul
-        robot.motorShooter.setPower(0);
+        startAndShoot();
 
         //Se pozitioneaza pentru wobble si il duce
         robot.rotateConstantSpeed(-5,0.4,2);
@@ -324,32 +255,32 @@ public class EasyOpenCvTesting extends LinearOpMode
 
         //Lasat primul wobble
         robot.servoWobble.setPosition(0.8);
-        robot.servoRidicare.setPosition(1);
+//        robot.servoRidicare.setPosition(1);
         sleep(500);
 
         //Mers dupa al doilea wobble
         robot.runUsingEncoders(robot.cmToTicks(-32),1,2);
-        robot.rotateConstantSpeed(-137,0.4,3);
+        robot.rotateConstantSpeed(-133,0.4,3);
         robot.runUsingEncodersLongRun(robot.cmToTicks(180),1,6);
 
         //Prinde al doilea wobble
         robot.servoWobble.setPosition(0);
         sleep(500);
-        robot.servoRidicare.setPosition(0.8);
+//        robot.servoRidicare.setPosition(0.8);
 
         //Se intoarce catre patrat
         robot.rotateConstantSpeed(160, 0.65, 5);
 
         //Duce al doilea wobble
-        robot.runUsingEncodersLongRun(robot.cmToTicks(190),1,7);
+        robot.runUsingEncodersLongRun(robot.cmToTicks(205),1,7);
 
         //Lasa al doilea wobble
         robot.servoWobble.setPosition(0.8);
-        robot.servoRidicare.setPosition(1);
+//        robot.servoRidicare.setPosition(1);
         sleep(500);
 
         //Parcare
-        robot.runUsingEncoders(robot.cmToTicks(-25),1,3);
+        robot.runUsingEncoders(robot.cmToTicks(-35),1,3);
 
 
     }

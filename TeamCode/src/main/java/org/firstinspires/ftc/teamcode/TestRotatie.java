@@ -21,20 +21,8 @@ public class TestRotatie extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
-            telemetry.addData("Motor mode: ", robot.dreaptaFata.getMode());
-            telemetry.addData("Other motor mode: ", robot.dreaptaSpate.getMode());
-            telemetry.update();
-            sleep(4000);
-            robot.runUsingEncoders(500, 0.4, 2);
-            telemetry.addData("Motor mode: ", robot.dreaptaFata.getMode());
-            telemetry.addData("Other motor mode: ", robot.dreaptaSpate.getMode());
-            telemetry.update();
-            sleep(4000);
-            robot.rotateConstantSpeed(90, 0.4, 5);
-            telemetry.addData("Motor mode: ", robot.dreaptaFata.getMode());
-            telemetry.addData("Other motor mode: ", robot.dreaptaSpate.getMode());
-            telemetry.update();
-            sleep(4000);
+            robot.runUsingEncodersLongRun(robot.cmToTicks(200), 1, 4);
+            robot.runUsingEncodersLongRun(-robot.cmToTicks(200), 1, 4);
         }
 
     }

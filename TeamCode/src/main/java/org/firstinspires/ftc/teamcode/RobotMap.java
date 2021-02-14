@@ -250,7 +250,10 @@ public class RobotMap {
             dreaptaFata.setPower(p);
             dreaptaSpate.setPower(p);
 
-            if (Math.abs(distance - stangaSpate.getCurrentPosition()) < 1400 && accelerate) {
+            if ((Math.abs(distance - stangaSpate.getCurrentPosition()) < 1400 ||
+                Math.abs(distance - stangaFata.getCurrentPosition()) < 1400 ||
+                Math.abs(distance - dreaptaFata.getCurrentPosition()) < 1400 ||
+                Math.abs(distance - dreaptaSpate.getCurrentPosition()) < 1400) && accelerate) {
                 p /= 2;
                 accelerate = false;
             }
@@ -351,7 +354,7 @@ public class RobotMap {
     {
 
         stangaSpate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        dreaptaSpate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        dreaptaFata.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         stangaFata.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         dreaptaSpate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
