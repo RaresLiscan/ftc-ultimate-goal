@@ -23,7 +23,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-@Autonomous(name="Autonomie test royals")
+@Autonomous(name="Autonomie test PID")
 public class AutoRoyals extends LinearOpMode
 {
 //    OpenCvCamera webcam;
@@ -58,9 +58,7 @@ public class AutoRoyals extends LinearOpMode
 
         if (opModeIsActive())
         {
-
-            NoRing();
-
+            FourRings();
         }
     }
 
@@ -70,12 +68,12 @@ public class AutoRoyals extends LinearOpMode
         robot.motorShooter.setPower(1);
 
         //Se pozitioneaza la tragere
-        robot.runUsingEncodersLongRun(robot.cmToTicks(160), 1, 3);
+        robot.runUsingPID(robot.cmToTicks(160), 1, 3);
 
 
         //Se pozitioneaza la tower goal
         robot.ridicareShooter.setPosition(TOWER_GOAL_HEIGHT);
-        robot.rotateConstantSpeed(-9, 0.3, 3);
+        robot.runUsingPID(-9, 0.3, 3);
 
         robot.servoIntake.setPosition(1);
         sleep(350);
@@ -99,7 +97,7 @@ public class AutoRoyals extends LinearOpMode
         startAndShoot();
         //Se pozitioneaza pentru wobble si il duce
         robot.rotateConstantSpeed(-12, 0.4, 2);
-        robot.runUsingEncodersLongRun(robot.cmToTicks(160), 1, 5);
+        robot.runUsingPID(robot.cmToTicks(160), 1, 5);
 
         //lasa primul wobble
         robot.servoWobble.setPosition(0.8);
@@ -107,10 +105,10 @@ public class AutoRoyals extends LinearOpMode
         sleep(500);
 
         //Se intoarce dupa al doilea
-        robot.runUsingEncoders(robot.cmToTicks(-50), 1, 5);
+        robot.runUsingPID(robot.cmToTicks(-50), 1, 5);
         robot.rotateConstantSpeed(-139, 0.4, 3);
         //Se duce dupa al doilea
-        robot.runUsingEncodersLongRun(robot.cmToTicks(230),1,7);
+        robot.runUsingPID(robot.cmToTicks(230),1,7);
 
         //Prinde al doilea wobble
         robot.servoWobble.setPosition(0);
@@ -121,7 +119,7 @@ public class AutoRoyals extends LinearOpMode
         robot.rotateConstantSpeed(168, 0.4, 5);
 
         //Duce al doilea wobble
-        robot.runUsingEncodersLongRun(robot.cmToTicks(262),1,7);
+        robot.runUsingPID(robot.cmToTicks(262),1,7);
 
 
         //Lasa al doilea wobble
@@ -130,7 +128,7 @@ public class AutoRoyals extends LinearOpMode
         sleep(500);
 
         //Parcheaza
-        robot.runUsingEncodersLongRun(robot.cmToTicks(-85),1,5);
+        robot.runUsingPID(robot.cmToTicks(-85),1,5);
     }
 
     private void NoRing(){

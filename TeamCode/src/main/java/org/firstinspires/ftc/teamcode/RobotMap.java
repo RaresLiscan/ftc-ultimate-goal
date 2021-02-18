@@ -3,11 +3,15 @@ package org.firstinspires.ftc.teamcode;
 import android.sax.StartElementListener;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
+
+import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
@@ -31,13 +35,16 @@ public class RobotMap {
     public DcMotor motorIntake = null;
     public Servo servoWobble, servoRidicare, servoIntake = null;
     public Servo ridicareShooter = null;
+    public CRServo rotireIntake = null;
     public BNO055IMU imu = null;
     Orientation lastAngles = new Orientation();
     double globalAngle, correction, prevAngle;
     private LinearOpMode opMode;
     private double imuOffset = 0;
     private double maxSpeed = 1.0;
-
+    ElapsedTime PIDTimer = new ElapsedTime();
+    public static PIDCoefficients pidCoefficients = new PIDCoefficients(1, 0, 0);
+    ElapsedTime runtime = new ElapsedTime();
 
 
     public RobotMap (HardwareMap hardwareMap, LinearOpMode opMode) {
@@ -52,6 +59,10 @@ public class RobotMap {
         motorShooter = hardwareMap.get(DcMotor.class, "motorShooter");
         motorIntake = hardwareMap.get(DcMotor.class, "motorIntake");
         ridicareShooter = hardwareMap.servo.get("ridicareShooter");
+        rotireIntake = hardwareMap.crservo.get("rotireIntake");
+
+        //stangaSpate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 
@@ -68,6 +79,65 @@ public class RobotMap {
         while (imu.isGyroCalibrated());
 
         this.opMode = opMode;
+    }
+
+    public void runUsingPID(int distance, double power, double timeout) {
+        dreaptaSpate.setDirection(DcMotorSimple.Direction.REVERSE);
+        dreaptaFata.setDirection(DcMotorSimple.Direction.REVERSE);
+        double integral = 0;
+        ArrayList<DcMotor> motors = new ArrayList<>();
+        motors.add(stangaFata);
+        motors.add(stangaSpate);
+        motors.add(dreaptaSpate);
+        motors.add(dreaptaFata);
+        PIDTimer.reset();
+        runtime.reset();
+
+        for (DcMotor motor: motors) {
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+        double globalError = distance;
+        double errorsSum = 0;
+        double[] lastErrors = new double[5];
+
+//        telemetry.addData("Global error: ", robot.stangaSpate.getCurrentPosition());
+//        telemetry.update();
+        while (Math.abs(globalError) > 100 && runtime.seconds() < timeout) {
+//            dashboardTelemetry.addData("Global error: ", globalError);
+            errorsSum = 0;
+            for (DcMotor motor: motors) {
+                //Getting the index of the motor
+                int index = motors.indexOf(motor);
+
+                //Calculating the errors of the motor
+                double error = distance - motor.getCurrentPosition();
+                double delta = lastErrors[index] - error;
+
+                //Calculating the integral and derivative terms
+                integral += delta * PIDTimer.time();
+                double derivative = delta/PIDTimer.time();
+
+                //Multiplying the errors with the PID coefficients
+                double P = pidCoefficients.p * error;
+                double I = pidCoefficients.i * integral;
+                double D = pidCoefficients.d * derivative;
+
+                //Setting the power of the motor
+                motor.setPower(P + I + D);
+//                telemetry.addData(String.format("Motor %d", motors.indexOf(motor)), motor.getPower());
+
+                //Updating the errors and timer for the next loop
+                lastErrors[index] = error;
+                errorsSum += error;
+                PIDTimer.reset();
+            }
+            globalError = errorsSum / 4;
+//            telemetry.addData("Updated global error: ", globalError);
+//            telemetry.update();
+        }
+        dreaptaSpate.setDirection(DcMotorSimple.Direction.FORWARD);
+        dreaptaFata.setDirection(DcMotorSimple.Direction.FORWARD);
     }
 
     public void driveFieldRelative3(double x, double y, double rotate) {
@@ -243,7 +313,7 @@ public class RobotMap {
         boolean accelerate = true;
 
         while (opMode.opModeIsActive() && stangaSpate.isBusy() && stangaFata.isBusy() && dreaptaSpate.isBusy() && dreaptaFata.isBusy() && runtime.seconds() < timeout) {
-            if (p < power && accelerate) p += 0.01;
+            if (p < power && accelerate) p += 0.02;
 
             stangaFata.setPower(p);
             stangaSpate.setPower(p);

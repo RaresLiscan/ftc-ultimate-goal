@@ -150,7 +150,7 @@ public class AutonomieInterior1 extends LinearOpMode {
 
     private void OneRing(){
 //        robot.motorShooter.setPower(1);
-        robot.runUsingEncoders(1600, 1, 5);
+        robot.runUsingPID(1600, 1, 5);
         sleep(150);
         robot.rotateConstantSpeed(3, 0.4, 3);
         //sleep(1000);
@@ -170,14 +170,14 @@ public class AutonomieInterior1 extends LinearOpMode {
         robot.rotate(4, 0.4, 5);
         sleep(350);
 
-        robot.runUsingEncoders(3300, 1, 5);
+        robot.runUsingPID(3300, 1, 5);
         robot.servoWobble.setPosition(1);
         sleep(750);
-        robot.runUsingEncoders(-6100,1,5);
+        robot.runUsingPID(-6100,1,5);
         sleep(500);
         robot.rotateConstantSpeed(137, 0.4, 5);
         sleep(500);
-        robot.runUsingEncoders(2150,1,5);
+        robot.runUsingPID(2150,1,5);
         robot.servoWobble.setPosition(0);
         sleep(500);
         robot.rotateConstantSpeed(-130, 0.4, 5);
