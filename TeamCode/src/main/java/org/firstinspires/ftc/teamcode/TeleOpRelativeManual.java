@@ -48,9 +48,9 @@ public class TeleOpRelativeManual extends LinearOpMode {
 
             // Servo loader
             if (gamepad1.right_bumper != false) {
-                //robot.servoIntake.setPower(1);
+                //robot.lansareRing.setPower(1);
             }
-            else //robot.servoIntake.setPower(0);
+            else //robot.lansareRing.setPower(0);
 
 
                 // Motor shooter

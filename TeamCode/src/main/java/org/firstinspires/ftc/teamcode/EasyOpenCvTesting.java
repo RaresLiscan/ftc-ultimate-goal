@@ -74,7 +74,7 @@ public class EasyOpenCvTesting extends LinearOpMode
         robot = new RobotMap(hardwareMap, this);
         robot.servoWobble.setPosition(0);
         robot.ridicareShooter.setPosition(TOWER_GOAL_HEIGHT);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         robot.zeroPowerBeh();
 
         dashboard = FtcDashboard.getInstance();
@@ -146,17 +146,17 @@ public class EasyOpenCvTesting extends LinearOpMode
         robot.ridicareShooter.setPosition(TOWER_GOAL_HEIGHT);
         robot.rotateConstantSpeed(-9, 0.3, 3);
 
-        robot.servoIntake.setPosition(1);
+        robot.lansareRing.setPosition(1);
         sleep(350);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         sleep(350);
-        robot.servoIntake.setPosition(1);
+        robot.lansareRing.setPosition(1);
         sleep(350);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         sleep(350);
-        robot.servoIntake.setPosition(1);
+        robot.lansareRing.setPosition(1);
         sleep(350);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         sleep(150);
         //Opreste shooterul
         robot.motorShooter.setPower(0);

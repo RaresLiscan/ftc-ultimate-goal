@@ -66,25 +66,25 @@ public class TeleOpSpan extends LinearOpMode {
 
             //Lansare inel
             if (gamepad1.left_trigger > 0.5) {
-                robot.servoIntake.setPosition(1);
+                robot.lansareRing.setPosition(1);
                 sleep(600);
-                robot.servoIntake.setPosition(0.5);
+                robot.lansareRing.setPosition(0.5);
             }
             if (gamepad1.right_trigger == 0) {
-                robot.servoIntake.setPosition(0.5);
+                robot.lansareRing.setPosition(0.5);
             }
             if (gamepad1.right_trigger == 1) {
-                robot.servoIntake.setPosition(1);
+                robot.lansareRing.setPosition(1);
                 sleep(500);
-                robot.servoIntake.setPosition(0.6);
+                robot.lansareRing.setPosition(0.5);
                 sleep(350);
-                robot.servoIntake.setPosition(1);
+                robot.lansareRing.setPosition(1);
                 sleep(350);
-                robot.servoIntake.setPosition(0.6);
+                robot.lansareRing.setPosition(0.5);
                 sleep(350);
-                robot.servoIntake.setPosition(1);
+                robot.lansareRing.setPosition(1);
                 sleep(350);
-                robot.servoIntake.setPosition(0);
+                robot.lansareRing.setPosition(0);
             }
 
             if (gamepad2.dpad_up) {

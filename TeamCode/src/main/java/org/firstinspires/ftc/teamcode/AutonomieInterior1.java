@@ -15,7 +15,7 @@ public class AutonomieInterior1 extends LinearOpMode {
 
         robot = new RobotMap(hardwareMap, this);
         robot.servoWobble.setPosition(0);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         robot.zeroPowerBeh();
         waitForStart();
 
@@ -42,17 +42,17 @@ public class AutonomieInterior1 extends LinearOpMode {
         robot.rotateConstantSpeed(3, 0.4, 3);
         //sleep(1000);
         //shooter
-        robot.servoIntake.setPosition(1);
+        robot.lansareRing.setPosition(1);
         sleep(350);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         sleep(350);
-        robot.servoIntake.setPosition(1);
+        robot.lansareRing.setPosition(1);
         sleep(350);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         sleep(350);
-        robot.servoIntake.setPosition(1);
+        robot.lansareRing.setPosition(1);
         sleep(350);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         sleep(350);
 
         robot.rotateConstantSpeed(35, 0.4, 5);
@@ -118,17 +118,17 @@ public class AutonomieInterior1 extends LinearOpMode {
         robot.rotateConstantSpeed(3, 0.4, 3);
         //sleep(1000);
         //shooter
-        robot.servoIntake.setPosition(1);
+        robot.lansareRing.setPosition(1);
         sleep(350);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         sleep(350);
-        robot.servoIntake.setPosition(1);
+        robot.lansareRing.setPosition(1);
         sleep(350);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         sleep(350);
-        robot.servoIntake.setPosition(1);
+        robot.lansareRing.setPosition(1);
         sleep(350);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         sleep(350);
 
         robot.rotateConstantSpeed(87, 0.4, 5);
@@ -155,17 +155,17 @@ public class AutonomieInterior1 extends LinearOpMode {
         robot.rotateConstantSpeed(3, 0.4, 3);
         //sleep(1000);
         //shooter
-        robot.servoIntake.setPosition(1);
+        robot.lansareRing.setPosition(1);
         sleep(350);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         sleep(350);
-        robot.servoIntake.setPosition(1);
+        robot.lansareRing.setPosition(1);
         sleep(350);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         sleep(350);
-        robot.servoIntake.setPosition(1);
+        robot.lansareRing.setPosition(1);
         sleep(350);
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
         sleep(350);
         robot.rotate(4, 0.4, 5);
         sleep(350);

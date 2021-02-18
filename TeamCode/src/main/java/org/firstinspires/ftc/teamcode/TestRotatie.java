@@ -16,13 +16,12 @@ public class TestRotatie extends LinearOpMode {
 
         robot = new RobotMap(hardwareMap, this);
         //robot.servoWobble.setPosition(0);
-        //robot.servoIntake.setPosition(0.5);
+        //robot.lansareRing.setPosition(0.5);
         robot.zeroPowerBeh();
         waitForStart();
 
         if (opModeIsActive()) {
-            robot.runUsingEncodersLongRun(robot.cmToTicks(200), 1, 4);
-            robot.runUsingEncodersLongRun(-robot.cmToTicks(200), 1, 4);
+            robot.runUsingEncodersLongRun(robot.cmToTicks(150), 1, 4);
         }
 
     }

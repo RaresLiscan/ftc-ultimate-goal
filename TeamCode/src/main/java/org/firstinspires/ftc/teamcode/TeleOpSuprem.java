@@ -25,7 +25,7 @@ public class TeleOpSuprem extends LinearOpMode {
         robot = new RobotMap(hardwareMap, this);
         waitForStart();
         runtime.reset();
-        robot.servoIntake.setPosition(0.5);
+        robot.lansareRing.setPosition(0.5);
 
         while (opModeIsActive()) {
 
@@ -67,21 +67,21 @@ public class TeleOpSuprem extends LinearOpMode {
 
             // Servo loader
             if (gamepad1.right_trigger >= 0.3 && gamepad1.right_trigger <= 0.7 && !hasShot) {
-                robot.servoIntake.setPosition(1);
+                robot.lansareRing.setPosition(1);
                 sleep(1200);
                 hasShot = true;
             }
             if (hasShot){
-                robot.servoIntake.setPosition(0.5);
+                robot.lansareRing.setPosition(0.5);
                 hasShot = false;
             }
             hasShot = true;
             while (gamepad1.right_trigger >= 0.9 && gamepad1.right_trigger <= 1|| !hasShot){
-                robot.servoIntake.setPosition(1);
+                robot.lansareRing.setPosition(1);
                 sleep(500);
-                robot.servoIntake.setPosition(0.5);
+                robot.lansareRing.setPosition(0.5);
                 sleep(800);
-                robot.servoIntake.setPosition(1);
+                robot.lansareRing.setPosition(1);
 
             }
 
@@ -103,7 +103,7 @@ public class TeleOpSuprem extends LinearOpMode {
 
             //Reset angle
             if(gamepad1.left_trigger > 0.5){
-//                robot.servoIntake.setPosition(1);
+//                robot.lansareRing.setPosition(1);
                 int robotAngle = (int) robot.getCurrentAngle();
                 robot.rotate(-robotAngle, 0.35, 3);
                 sleep(200);

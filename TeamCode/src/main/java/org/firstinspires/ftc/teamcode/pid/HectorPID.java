@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.pid;
 
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.control.PIDFController;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -27,6 +28,8 @@ public class HectorPID extends LinearOpMode {
     FtcDashboard dashboard;
     Telemetry dashboardTelemetry;
 
+    private PIDFController controller;
+
     public static int TARGET_POS = 3000;
 
     void moveTestMotor (double targetPosition) {
@@ -39,7 +42,7 @@ public class HectorPID extends LinearOpMode {
         telemetry.update();
 
         while (Math.abs(error) >= 9) {
-            error = robot.stangaSpate.getCurrentPosition() - targetPosition;
+            error = -robot.stangaSpate.getCurrentPosition() + targetPosition;
             double changInError = lastError - error;
             integral += changInError * PIDTimer.time();
             double derivative = changInError / PIDTimer.time();
@@ -53,6 +56,25 @@ public class HectorPID extends LinearOpMode {
         }
         sleep(2000);
     }
+
+//    void moveTestMotor (double targetPosition) {
+//        double error = testMotor.getCurrentPosition();
+//        double lastError = 0;
+//
+//        while (Math.abs(error) <= 9 && repetitions < 40) {
+//            error = testMotor.getCurrentPosition() - targetPosition;
+//            double changInError = lastError - error;
+//            integral += changInError * PIDTimer.time();
+//            double derivative = changInError / PIDTimer.time();
+//            double P = pidCoefficients.p * error;
+//            double I = pidCoefficients.i * integral;
+//            double D = pidCoefficients.d * derivative;
+//            testMotor.setPower(P + I + D);
+//            lastError = error;
+//            repetitions ++;
+//            PIDTimer.reset();
+//        }
+//    }
 
     public void moveRobotUsingPID(int distance, double timeout) {
         robot.dreaptaSpate.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -130,7 +152,7 @@ public class HectorPID extends LinearOpMode {
         waitForStart();
 
         if (opModeIsActive()) {
-            moveRobotUsingPID(TARGET_POS, 4);
+            moveTestMotor(TARGET_POS);
         }
     }
 }

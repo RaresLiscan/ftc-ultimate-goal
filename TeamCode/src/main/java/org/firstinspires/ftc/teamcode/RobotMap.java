@@ -33,7 +33,7 @@ public class RobotMap {
     public DcMotor dreaptaFata = null;
     public DcMotor motorShooter = null;
     public DcMotor motorIntake = null;
-    public Servo servoWobble, servoRidicare, servoIntake = null;
+    public Servo servoWobble, servoRidicare, lansareRing = null;
     public Servo ridicareShooter = null;
     public CRServo rotireIntake = null;
     public BNO055IMU imu = null;
@@ -55,11 +55,13 @@ public class RobotMap {
         dreaptaSpate = hardwareMap.get(DcMotor.class, "dreaptaSpate");
         servoWobble = hardwareMap.get(Servo.class, "servoWobble");
         servoRidicare = hardwareMap.get(Servo.class, "servoRidicare");
-        servoIntake = hardwareMap.get(Servo.class, "servoIntake");
+        lansareRing = hardwareMap.get(Servo.class, "servoIntake");
         motorShooter = hardwareMap.get(DcMotor.class, "motorShooter");
         motorIntake = hardwareMap.get(DcMotor.class, "motorIntake");
         ridicareShooter = hardwareMap.servo.get("ridicareShooter");
         rotireIntake = hardwareMap.crservo.get("rotireIntake");
+
+        servoRidicare.setPosition(1);
 
         //stangaSpate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
@@ -311,21 +313,27 @@ public class RobotMap {
         runtime.reset();
 
         boolean accelerate = true;
+        double minPower = p/3;
 
         while (opMode.opModeIsActive() && stangaSpate.isBusy() && stangaFata.isBusy() && dreaptaSpate.isBusy() && dreaptaFata.isBusy() && runtime.seconds() < timeout) {
-            if (p < power && accelerate) p += 0.02;
+            if (p < power && accelerate) p += 0.025;//task 1
 
             stangaFata.setPower(p);
             stangaSpate.setPower(p);
             dreaptaFata.setPower(p);
             dreaptaSpate.setPower(p);
 
-            if ((Math.abs(distance - stangaSpate.getCurrentPosition()) < 1400 ||
-                Math.abs(distance - stangaFata.getCurrentPosition()) < 1400 ||
-                Math.abs(distance - dreaptaFata.getCurrentPosition()) < 1400 ||
-                Math.abs(distance - dreaptaSpate.getCurrentPosition()) < 1400) && accelerate) {
-                p /= 2;
-                accelerate = false;
+            if ((Math.abs(distance - stangaSpate.getCurrentPosition()) < cmToTicks(30) ||
+                Math.abs(distance - stangaFata.getCurrentPosition()) < cmToTicks(30) ||
+                Math.abs(distance - dreaptaFata.getCurrentPosition()) < cmToTicks(30) ||
+                Math.abs(distance - dreaptaSpate.getCurrentPosition()) < cmToTicks(30)) && accelerate)
+            {
+                if (p > minPower && accelerate) {
+                    p -= 0.025;
+                }
+                else {
+                    accelerate = false;
+                }
             }
 
         }
