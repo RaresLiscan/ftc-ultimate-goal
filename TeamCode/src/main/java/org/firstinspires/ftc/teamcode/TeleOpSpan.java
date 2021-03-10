@@ -14,8 +14,28 @@ public class TeleOpSpan extends LinearOpMode {
     private double ridicareShooterPosition = 1;
     private final double RIDICARE_SHOOTER_SPEED = 0.001;
 
-    private final double TOWER_GOAL_HEIGHT = 0.61;
-    private final double POWER_SHOT_HEIGHT = 0.7;
+    private final double TOWER_GOAL_HEIGHT = 0.55;
+    private final double POWER_SHOT_HEIGHT = 0.71;
+
+    private final double SHOOT_TIMEOUT = 350;//miliseconds
+    private int repetitions = 5;
+
+
+    //TODO: regandit functia asta
+    private void shootRings() {
+        if (repetitions < 3) {
+            if (runtime.milliseconds() >= SHOOT_TIMEOUT) {
+                if (robot.lansareRing.getPosition() > 0.75) {
+                    robot.lansareRing.setPosition(0.5);
+                }
+                else {
+                    robot.lansareRing.setPosition(1);
+                }
+                runtime.reset();
+                repetitions++;
+            }
+        }
+    }
 
 
     @Override
@@ -49,6 +69,12 @@ public class TeleOpSpan extends LinearOpMode {
                 }
                 else {
                     robot.motorShooter.setPower(1);
+//                    if (robot.ridicareShooter.getPosition() == TOWER_GOAL_HEIGHT) {
+//                        robot.motorShooter.setPower(1);
+//                    }
+//                    else {
+//                        robot.motorShooter.setPower(0.5);
+//                    }
                 }
                 robot.motorIntake.setPower(0);
                 runtime.reset();
@@ -63,6 +89,11 @@ public class TeleOpSpan extends LinearOpMode {
                 }
                 runtime.reset();
             }
+            if (gamepad2.left_trigger > 0) {
+                robot.motorShooter.setPower(0);
+                robot.motorIntake.setPower(0.4);
+                runtime.reset();
+            }
 
             //Lansare inel
             if (gamepad1.left_trigger > 0.5) {
@@ -73,25 +104,29 @@ public class TeleOpSpan extends LinearOpMode {
             if (gamepad1.right_trigger == 0) {
                 robot.lansareRing.setPosition(0.5);
             }
+
             if (gamepad1.right_trigger == 1) {
-                robot.lansareRing.setPosition(1);
-                sleep(500);
-                robot.lansareRing.setPosition(0.5);
-                sleep(350);
-                robot.lansareRing.setPosition(1);
-                sleep(350);
-                robot.lansareRing.setPosition(0.5);
-                sleep(350);
-                robot.lansareRing.setPosition(1);
-                sleep(350);
-                robot.lansareRing.setPosition(0);
+                robot.shoot3Rings();
             }
 
             if (gamepad2.dpad_up) {
                 robot.ridicareShooter.setPosition(TOWER_GOAL_HEIGHT);
+//                if (robot.motorShooter.getPower() != 0) {
+//                    robot.motorShooter.setPower(1);
+//                }
             }
             if (gamepad2.dpad_down) {
                 robot.ridicareShooter.setPosition(POWER_SHOT_HEIGHT);
+//                if (robot.motorShooter.getPower() != 0) {
+//                    robot.motorShooter.setPower(0.5);
+//                }
+            }
+
+            if (gamepad1.dpad_down) {
+                robot.motorShooter.setPower(0.65);
+            }
+            if (gamepad1.dpad_up) {
+                robot.motorShooter.setPower(1);
             }
 
             telemetry.addData("Ridicare servo position: ", robot.ridicareShooter.getPosition());

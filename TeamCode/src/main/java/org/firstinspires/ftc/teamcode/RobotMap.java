@@ -316,26 +316,25 @@ public class RobotMap {
         double minPower = p/3;
 
         while (opMode.opModeIsActive() && stangaSpate.isBusy() && stangaFata.isBusy() && dreaptaSpate.isBusy() && dreaptaFata.isBusy() && runtime.seconds() < timeout) {
-            if (p < power && accelerate) p += 0.025;//task 1
+            if (p < power && accelerate) p += 0.025;
 
             stangaFata.setPower(p);
             stangaSpate.setPower(p);
             dreaptaFata.setPower(p);
             dreaptaSpate.setPower(p);
 
-            if ((Math.abs(distance - stangaSpate.getCurrentPosition()) < cmToTicks(30) ||
-                Math.abs(distance - stangaFata.getCurrentPosition()) < cmToTicks(30) ||
-                Math.abs(distance - dreaptaFata.getCurrentPosition()) < cmToTicks(30) ||
-                Math.abs(distance - dreaptaSpate.getCurrentPosition()) < cmToTicks(30)) && accelerate)
+            if ((Math.abs(distance - stangaSpate.getCurrentPosition()) < cmToTicks(40) ||
+                Math.abs(distance - stangaFata.getCurrentPosition()) < cmToTicks(40) ||
+                Math.abs(distance - dreaptaFata.getCurrentPosition()) < cmToTicks(40) ||
+                Math.abs(distance - dreaptaSpate.getCurrentPosition()) < cmToTicks(40)) && accelerate)
             {
                 if (p > minPower && accelerate) {
-                    p -= 0.025;
+                    p -= 0.03;
                 }
                 else {
                     accelerate = false;
                 }
             }
-
         }
 
         stopDriving();
@@ -344,6 +343,21 @@ public class RobotMap {
 
     public int cmToTicks(double cm) {
         return (int)(cm / (Math.PI * 10) * 1120);
+    }
+
+    public void shoot3Rings() {
+        lansareRing.setPosition(1);
+        opMode.sleep(350);
+        lansareRing.setPosition(0.5);
+        opMode.sleep(350);
+        lansareRing.setPosition(1);
+        opMode.sleep(350);
+        lansareRing.setPosition(0.5);
+        opMode.sleep(350);
+        lansareRing.setPosition(1);
+        opMode.sleep(350);
+        lansareRing.setPosition(0.5);
+        opMode.sleep(150);
     }
 
 
@@ -370,7 +384,6 @@ public class RobotMap {
     public void rotateConstantSpeed(int degrees, double power, int timeout)
     {
 
-        opMode.sleep(300);
         dreaptaFata.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         stangaFata.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         dreaptaSpate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
