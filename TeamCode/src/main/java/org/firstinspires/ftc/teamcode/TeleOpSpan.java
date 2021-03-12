@@ -41,6 +41,7 @@ public class TeleOpSpan extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new RobotMap(hardwareMap, this);
+//        robot.zeroPowerBeh();
         runtime = new ElapsedTime();
         runtime.reset();
 

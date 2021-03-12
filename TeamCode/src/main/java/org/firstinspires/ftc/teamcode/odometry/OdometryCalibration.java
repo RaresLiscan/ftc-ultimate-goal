@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.odometry;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
@@ -22,17 +24,20 @@ import java.io.File;
  *
  * */
 @Autonomous
-@Disabled
-public class CalibrationTutorial extends LinearOpMode {
+@Config
+//@Disabled
+public class OdometryCalibration extends LinearOpMode {
 
     DcMotor frontRight, frontLeft, backRight, backLeft;
-    DcMotor leftEncoder, rightEncoder, middleEncoder;
+    DcMotor leftEncoder, rightEncoder;
 
     BNO055IMU imu;
 
+    FtcDashboard dashboard;
+
     ElapsedTime timer = new ElapsedTime();
 
-    static final double calibrationSpeed = .5;
+    public static double calibrationSpeed = .5;
 
     static final double TICK_PER_REVOLUTION = 1440;
     static final double WHEEL_DIAMETER = 100/25.4;
@@ -41,18 +46,21 @@ public class CalibrationTutorial extends LinearOpMode {
     static final double TICKS_PER_INCH = WHEEL_DIAMETER * Math.PI * GEAR_RATIO / TICK_PER_REVOLUTION;
 
     File sideWheelsSeparationFile = AppUtil.getInstance().getSettingsFile("sideWheelsSeparationFile");
-    File middleTickOffsetFile = AppUtil.getInstance().getSettingsFile("middleTickOffsetFile");
+//    File middleTickOffsetFile = AppUtil.getInstance().getSettingsFile("middleTickOffsetFile");
 
     @Override
     public void runOpMode() throws InterruptedException {
-        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
-        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
-        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
-        backRight = hardwareMap.get(DcMotor.class, "backRight");
+
+        dashboard = FtcDashboard.getInstance();
+
+        frontLeft = hardwareMap.get(DcMotor.class, "stangaFata");
+        frontRight = hardwareMap.get(DcMotor.class, "dreaptaFata");
+        backLeft = hardwareMap.get(DcMotor.class, "stangaSpate");
+        backRight = hardwareMap.get(DcMotor.class, "dreaptaSpate");
 
         leftEncoder = hardwareMap.dcMotor.get("leftEncoder");
         rightEncoder = hardwareMap.dcMotor.get("rightEncoder");
-        middleEncoder = hardwareMap.dcMotor.get("middleEncoder");
+//        middleEncoder = hardwareMap.dcMotor.get("middleEncoder");
 
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -109,21 +117,21 @@ public class CalibrationTutorial extends LinearOpMode {
         double encoderDifference = Math.abs(Math.abs(leftEncoder.getCurrentPosition()) - Math.abs(rightEncoder.getCurrentPosition()));
         double sideEncoderTickOffset = encoderDifference / angle;
         double sideWheelSeparation =  (180 * sideEncoderTickOffset) / (TICKS_PER_INCH * Math.PI);
-        double middleOffset = middleEncoder.getCurrentPosition() / Math.toRadians(imu.getAngularOrientation().firstAngle);
+//        double middleOffset = middleEncoder.getCurrentPosition() / Math.toRadians(imu.getAngularOrientation().firstAngle);
 
 
         ReadWriteFile.writeFile(sideWheelsSeparationFile, String.valueOf(sideWheelSeparation));
-        ReadWriteFile.writeFile(middleTickOffsetFile, String.valueOf(middleOffset));
+//        ReadWriteFile.writeFile(middleTickOffsetFile, String.valueOf(middleOffset));
 
     }
 
     private void resetOdometryEncoders() {
         leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        middleEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        middleEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        leftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        middleEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        leftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        rightEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        middleEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 }

@@ -8,12 +8,12 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 @TeleOp
-@Disabled
+//@Disabled
 public class UpdateRobotPositionTutorial extends LinearOpMode {
 
     DcMotor frontLeft, frontRight, backLeft, backRight;
 
-    DcMotor leftEncoder, rightEncoder, middleEncoder;
+    DcMotor leftEncoder, rightEncoder;
     BNO055IMU imu;
 
     static final double TICK_PER_REVOLUTION = 1440;
@@ -26,14 +26,14 @@ public class UpdateRobotPositionTutorial extends LinearOpMode {
 
     @Override
     public void runOpMode() throws InterruptedException {
-        frontLeft = hardwareMap.get(DcMotor.class, "frontLeft");
-        frontRight = hardwareMap.get(DcMotor.class, "frontRight");
-        backLeft = hardwareMap.get(DcMotor.class, "backLeft");
-        backRight = hardwareMap.get(DcMotor.class, "backRight");
+        frontLeft = hardwareMap.get(DcMotor.class, "stangaFata");
+        frontRight = hardwareMap.get(DcMotor.class, "dreaptaFata");
+        backLeft = hardwareMap.get(DcMotor.class, "stangaSpate");
+        backRight = hardwareMap.get(DcMotor.class, "dreaptaSpate");
 
         leftEncoder = hardwareMap.dcMotor.get("leftEncoder");
         rightEncoder = hardwareMap.dcMotor.get("rightEncoder");
-        middleEncoder = hardwareMap.dcMotor.get("middleEncoder");
+//        middleEncoder = hardwareMap.dcMotor.get("middleEncoder");
 
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -56,7 +56,7 @@ public class UpdateRobotPositionTutorial extends LinearOpMode {
 
         waitForStart();
 
-        positionUpdate = new GlobalCoordinateSystemTutorial(leftEncoder, rightEncoder, middleEncoder, TICKS_PER_INCH, 100);
+        positionUpdate = new GlobalCoordinateSystemTutorial(leftEncoder, rightEncoder, TICKS_PER_INCH, 100);
         Thread position = new Thread(positionUpdate);
         position.start();
 
@@ -81,10 +81,10 @@ public class UpdateRobotPositionTutorial extends LinearOpMode {
     private void resetOdometryEncoders() {
         leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        middleEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        middleEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        leftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        rightEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        middleEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        leftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        rightEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+//        middleEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 }

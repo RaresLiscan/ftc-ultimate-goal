@@ -9,7 +9,8 @@ import java.io.File;
 
 public class GlobalCoordinateSystemTutorial implements Runnable {
 
-    DcMotor leftEncoder, rightEncoder, middleEncoder;
+    DcMotor leftEncoder, rightEncoder;
+//    DcMotor middleEncoder;
 
     boolean isRunning = true;
 
@@ -27,14 +28,32 @@ public class GlobalCoordinateSystemTutorial implements Runnable {
     File sideWheelSeparationFile = AppUtil.getInstance().getSettingsFile("sideWheelsSeparationFile");
     File middleTickOffsetFile = AppUtil.getInstance().getSettingsFile("middleTickOffsetFile");
 
-    public GlobalCoordinateSystemTutorial(DcMotor leftEncoder, DcMotor rightEncoder, DcMotor middleEncoder, double TICKS_PER_INCH, int threadSleepDelay) {
+    public GlobalCoordinateSystemTutorial(DcMotor leftEncoder, DcMotor rightEncoder, /*DcMotor middleEncoder,*/ double TICKS_PER_INCH, int threadSleepDelay) {
         this.leftEncoder = leftEncoder;
         this.rightEncoder = rightEncoder;
-        this.middleEncoder = middleEncoder;
+//        this.middleEncoder = middleEncoder;
         sleepTime = threadSleepDelay;
 
         encoderWheelDistance = Double.parseDouble(ReadWriteFile.readFile(sideWheelSeparationFile).trim()) * TICKS_PER_INCH;
         middleEncoderTickOffset = Double.parseDouble(ReadWriteFile.readFile(middleTickOffsetFile).trim());
+    }
+
+    public void updatePositionTest() {
+        leftEncoderPosition = leftEncoder.getCurrentPosition();
+        rightEncoderPosition = rightEncoder.getCurrentPosition();
+
+        double leftChange = leftEncoderPosition - OLDLeftEncoderPosition;
+        double rightChange = rightEncoderPosition - OLDRightEncoderPosition;
+        double middleChange = (leftChange + rightChange) / 2;
+
+        double theta = (rightChange - leftChange) / encoderWheelDistance;
+
+        robotOrientation += theta;
+        globalX = globalX + ((middleChange/theta) * Math.sin(theta) / Math.cos(theta)) * Math.cos(robotOrientation);
+        globalY = globalY + ((middleChange/theta) * Math.sin(theta) / Math.cos(theta)) * Math.sin(robotOrientation);
+
+        OLDLeftEncoderPosition = leftEncoderPosition;
+        OLDRightEncoderPosition = rightEncoderPosition;
     }
 
     public void positionUpdate() {
@@ -42,20 +61,20 @@ public class GlobalCoordinateSystemTutorial implements Runnable {
         rightEncoderPosition = rightEncoder.getCurrentPosition();
 
         double leftChange = leftEncoderPosition - OLDLeftEncoderPosition;
-        double rightChange = rightEncoderPosition - OLDRightEncoderPosition;;
+        double rightChange = rightEncoderPosition - OLDRightEncoderPosition;
 
         changeInOrientation = (leftChange - rightChange) / encoderWheelDistance;
         robotOrientation += changeInOrientation;
 
-        middleEncoderPosition = middleEncoder.getCurrentPosition();
-        double rawHorizontalChange = middleEncoderPosition - OLDMiddleEncoderPosition;
-        double horizontalChange = rawHorizontalChange - (changeInOrientation * middleEncoderTickOffset);
+//        middleEncoderPosition = middleEncoder.getCurrentPosition();
+//        double rawHorizontalChange = middleEncoderPosition - OLDMiddleEncoderPosition;
+//        double horizontalChange = rawHorizontalChange - (changeInOrientation * middleEncoderTickOffset);
 
-        double sides = (rightChange + leftChange) / 2;
-        double frontBack =  horizontalChange;
+//        double sides = (rightChange + leftChange) / 2;
+//        double frontBack =  horizontalChange;
 
-        globalX = sides * Math.sin(robotOrientation) + frontBack * Math.cos(robotOrientation);
-        globalY = sides * Math.cos(robotOrientation) + frontBack * Math.sin(robotOrientation);
+//        globalX = sides * Math.sin(robotOrientation) + frontBack * Math.cos(robotOrientation);
+//        globalY = sides * Math.cos(robotOrientation) + frontBack * Math.sin(robotOrientation);
 
         OLDLeftEncoderPosition = leftEncoderPosition;
         OLDRightEncoderPosition = rightEncoderPosition;
@@ -81,7 +100,7 @@ public class GlobalCoordinateSystemTutorial implements Runnable {
     @Override
     public void run() {
         while (isRunning) {
-            positionUpdate();
+            updatePositionTest();
         }
 
         try {

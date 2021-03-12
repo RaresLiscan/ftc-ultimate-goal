@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import android.sax.StartElementListener;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.PIDCoefficients;
 import com.qualcomm.robotcore.hardware.Servo;
@@ -27,12 +28,13 @@ import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.norm
 
 public class RobotMap {
 
-    public DcMotor stangaSpate = null;
-    public DcMotor dreaptaSpate = null;
-    public DcMotor stangaFata = null;
-    public DcMotor dreaptaFata = null;
+    public DcMotorEx stangaSpate = null;
+    public DcMotorEx dreaptaSpate = null;
+    public DcMotorEx stangaFata = null;
+    public DcMotorEx dreaptaFata = null;
     public DcMotor motorShooter = null;
     public DcMotor motorIntake = null;
+    public DcMotor leftEncoder, rightEncoder;
     public Servo servoWobble, servoRidicare, lansareRing = null;
     public Servo ridicareShooter = null;
     public CRServo rotireIntake = null;
@@ -49,10 +51,10 @@ public class RobotMap {
 
     public RobotMap (HardwareMap hardwareMap, LinearOpMode opMode) {
 
-        stangaFata = hardwareMap.get(DcMotor.class, "stangaFata");
-        dreaptaFata = hardwareMap.get(DcMotor.class, "dreaptaFata");
-        stangaSpate = hardwareMap.get(DcMotor.class, "stangaSpate");
-        dreaptaSpate = hardwareMap.get(DcMotor.class, "dreaptaSpate");
+        stangaFata = hardwareMap.get(DcMotorEx.class, "stangaFata");
+        dreaptaFata = hardwareMap.get(DcMotorEx.class, "dreaptaFata");
+        stangaSpate = hardwareMap.get(DcMotorEx.class, "stangaSpate");
+        dreaptaSpate = hardwareMap.get(DcMotorEx.class, "dreaptaSpate");
         servoWobble = hardwareMap.get(Servo.class, "servoWobble");
         servoRidicare = hardwareMap.get(Servo.class, "servoRidicare");
         lansareRing = hardwareMap.get(Servo.class, "servoIntake");
@@ -60,6 +62,11 @@ public class RobotMap {
         motorIntake = hardwareMap.get(DcMotor.class, "motorIntake");
         ridicareShooter = hardwareMap.servo.get("ridicareShooter");
         rotireIntake = hardwareMap.crservo.get("rotireIntake");
+
+        stangaFata.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        stangaSpate.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        dreaptaFata.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        dreaptaSpate.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         servoRidicare.setPosition(1);
 
@@ -81,6 +88,11 @@ public class RobotMap {
         while (imu.isGyroCalibrated());
 
         this.opMode = opMode;
+    }
+
+    public void resetOdometryEncoders() {
+        leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
     public void runUsingPID(int distance, double power, double timeout) {
@@ -214,13 +226,14 @@ public class RobotMap {
         largest = Math.max(largest, Math.abs(backLeftSpeed));
         largest = Math.max(largest, Math.abs(backRightSpeed));
 
-        stangaFata.setPower(frontLeftSpeed/largest);
-        stangaSpate.setPower(backLeftSpeed/largest);
-        dreaptaFata.setPower(frontRightSpeed/largest);
-        dreaptaSpate.setPower(backRightSpeed/largest);
+        stangaFata.setPower(frontLeftSpeed);
+        stangaSpate.setPower(backLeftSpeed);
+        dreaptaFata.setPower(frontRightSpeed);
+        dreaptaSpate.setPower(backRightSpeed);
     }
 
     public void teleOpDrive(double forward, double rotate) {
+
         double frontLeftSpeed = SQRT(forward - rotate);
         double frontRightSpeed = SQRT(-forward - rotate);
         double backLeftSpeed = SQRT(forward - rotate);
