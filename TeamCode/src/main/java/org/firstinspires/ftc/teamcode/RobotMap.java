@@ -22,6 +22,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.odometryNew.OdometryGlobalCoordinatePosition;
 
 import static org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.normalizeRadians;
 
@@ -33,11 +34,12 @@ public class RobotMap {
     public DcMotorEx stangaFata = null;
     public DcMotorEx dreaptaFata = null;
     public DcMotor motorShooter = null;
-    public DcMotor motorIntake = null;
+    public DcMotor motorIntake = null; //are montat encoderul din mijloc
     public DcMotor leftEncoder, rightEncoder;
     public Servo servoWobble, servoRidicare, lansareRing = null;
     public Servo ridicareShooter = null;
     public CRServo rotireIntake = null;
+    public DcMotorEx encoderStanga, encoderDreapta;
     public BNO055IMU imu = null;
     Orientation lastAngles = new Orientation();
     double globalAngle, correction, prevAngle;
@@ -47,6 +49,9 @@ public class RobotMap {
     ElapsedTime PIDTimer = new ElapsedTime();
     public static PIDCoefficients pidCoefficients = new PIDCoefficients(1, 0, 0);
     ElapsedTime runtime = new ElapsedTime();
+    final double COUNTS_PER_INCH = 194.04;//1440 ticks, 6cm diametru
+    public OdometryGlobalCoordinatePosition globalPositionUpdate;
+    public Thread positionThread;
 
 
     public RobotMap (HardwareMap hardwareMap, LinearOpMode opMode) {
@@ -62,16 +67,28 @@ public class RobotMap {
         motorIntake = hardwareMap.get(DcMotor.class, "motorIntake");
         ridicareShooter = hardwareMap.servo.get("ridicareShooter");
         rotireIntake = hardwareMap.crservo.get("rotireIntake");
+        encoderStanga = hardwareMap.get(DcMotorEx.class, "encoderStanga");
+        encoderDreapta = hardwareMap.get(DcMotorEx.class, "encoderDreapta");
 
-        stangaFata.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        stangaSpate.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        dreaptaFata.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        dreaptaSpate.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        encoderStanga.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        encoderDreapta.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        motorIntake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
+        encoderStanga.setDirection(DcMotorSimple.Direction.REVERSE);
+        encoderDreapta.setDirection(DcMotorSimple.Direction.REVERSE);
+        motorIntake.setDirection(DcMotorSimple.Direction.REVERSE);
+
+        encoderDreapta.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        encoderStanga.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        motorIntake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        globalPositionUpdate = new OdometryGlobalCoordinatePosition(encoderStanga, encoderDreapta, motorIntake, COUNTS_PER_INCH, 75);
+        positionThread = new Thread(globalPositionUpdate);
+        positionThread.start();
+//        globalPositionUpdate.reverseNormalEncoder();
+        globalPositionUpdate.reverseLeftEncoder();
 
         servoRidicare.setPosition(1);
-
-        //stangaSpate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
 
         BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
 

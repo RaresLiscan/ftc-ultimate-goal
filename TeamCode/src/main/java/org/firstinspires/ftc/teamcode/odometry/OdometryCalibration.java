@@ -23,13 +23,13 @@ import java.io.File;
  * odometry ticks to rotate.
  *
  * */
-@Autonomous
+@Autonomous(name="Odometry calibration")
 @Config
-//@Disabled
+@Disabled
 public class OdometryCalibration extends LinearOpMode {
 
     DcMotor frontRight, frontLeft, backRight, backLeft;
-    DcMotor leftEncoder, rightEncoder;
+    DcMotor leftEncoder, rightEncoder, middleEncoder;
 
     BNO055IMU imu;
 
@@ -37,16 +37,16 @@ public class OdometryCalibration extends LinearOpMode {
 
     ElapsedTime timer = new ElapsedTime();
 
-    public static double calibrationSpeed = .5;
+    public static double calibrationSpeed = .2;
 
     static final double TICK_PER_REVOLUTION = 1440;
-    static final double WHEEL_DIAMETER = 100/25.4;
+    static final double WHEEL_DIAMETER = 60/25.4;
     static final double GEAR_RATIO = 1;
 
     static final double TICKS_PER_INCH = WHEEL_DIAMETER * Math.PI * GEAR_RATIO / TICK_PER_REVOLUTION;
 
     File sideWheelsSeparationFile = AppUtil.getInstance().getSettingsFile("sideWheelsSeparationFile");
-//    File middleTickOffsetFile = AppUtil.getInstance().getSettingsFile("middleTickOffsetFile");
+    File middleTickOffsetFile = AppUtil.getInstance().getSettingsFile("middleTickOffsetFile");
 
     @Override
     public void runOpMode() throws InterruptedException {
@@ -58,9 +58,9 @@ public class OdometryCalibration extends LinearOpMode {
         backLeft = hardwareMap.get(DcMotor.class, "stangaSpate");
         backRight = hardwareMap.get(DcMotor.class, "dreaptaSpate");
 
-        leftEncoder = hardwareMap.dcMotor.get("leftEncoder");
-        rightEncoder = hardwareMap.dcMotor.get("rightEncoder");
-//        middleEncoder = hardwareMap.dcMotor.get("middleEncoder");
+        leftEncoder = hardwareMap.dcMotor.get("encoderStanga");
+        rightEncoder = hardwareMap.dcMotor.get("encoderDreapta");
+        middleEncoder = hardwareMap.dcMotor.get("motorIntake");
 
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -117,21 +117,21 @@ public class OdometryCalibration extends LinearOpMode {
         double encoderDifference = Math.abs(Math.abs(leftEncoder.getCurrentPosition()) - Math.abs(rightEncoder.getCurrentPosition()));
         double sideEncoderTickOffset = encoderDifference / angle;
         double sideWheelSeparation =  (180 * sideEncoderTickOffset) / (TICKS_PER_INCH * Math.PI);
-//        double middleOffset = middleEncoder.getCurrentPosition() / Math.toRadians(imu.getAngularOrientation().firstAngle);
+        double middleOffset = middleEncoder.getCurrentPosition() / Math.toRadians(imu.getAngularOrientation().firstAngle);
 
 
         ReadWriteFile.writeFile(sideWheelsSeparationFile, String.valueOf(sideWheelSeparation));
-//        ReadWriteFile.writeFile(middleTickOffsetFile, String.valueOf(middleOffset));
+        ReadWriteFile.writeFile(middleTickOffsetFile, String.valueOf(middleOffset));
 
     }
 
     private void resetOdometryEncoders() {
         leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        middleEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        middleEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-//        leftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        rightEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        middleEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        middleEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 }

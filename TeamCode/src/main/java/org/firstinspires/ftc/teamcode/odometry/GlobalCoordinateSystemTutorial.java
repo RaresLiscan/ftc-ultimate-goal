@@ -10,7 +10,7 @@ import java.io.File;
 public class GlobalCoordinateSystemTutorial implements Runnable {
 
     DcMotor leftEncoder, rightEncoder;
-//    DcMotor middleEncoder;
+    DcMotor middleEncoder;
 
     boolean isRunning = true;
 
@@ -28,32 +28,40 @@ public class GlobalCoordinateSystemTutorial implements Runnable {
     File sideWheelSeparationFile = AppUtil.getInstance().getSettingsFile("sideWheelsSeparationFile");
     File middleTickOffsetFile = AppUtil.getInstance().getSettingsFile("middleTickOffsetFile");
 
-    public GlobalCoordinateSystemTutorial(DcMotor leftEncoder, DcMotor rightEncoder, /*DcMotor middleEncoder,*/ double TICKS_PER_INCH, int threadSleepDelay) {
+    public GlobalCoordinateSystemTutorial(DcMotor leftEncoder, DcMotor rightEncoder, DcMotor middleEncoder, double TICKS_PER_INCH, int threadSleepDelay) {
         this.leftEncoder = leftEncoder;
         this.rightEncoder = rightEncoder;
-//        this.middleEncoder = middleEncoder;
+        this.middleEncoder = middleEncoder;
         sleepTime = threadSleepDelay;
 
-        encoderWheelDistance = Double.parseDouble(ReadWriteFile.readFile(sideWheelSeparationFile).trim()) * TICKS_PER_INCH;
-        middleEncoderTickOffset = Double.parseDouble(ReadWriteFile.readFile(middleTickOffsetFile).trim());
+//        encoderWheelDistance = Double.parseDouble(ReadWriteFile.readFile(sideWheelSeparationFile).trim()) * TICKS_PER_INCH;
+        encoderWheelDistance = 31 * 2.54 * TICKS_PER_INCH;
+//        middleEncoderTickOffset = Double.parseDouble(ReadWriteFile.readFile(middleTickOffsetFile).trim());
+        middleEncoderTickOffset = 4 * 2.54;
     }
 
     public void updatePositionTest() {
         leftEncoderPosition = leftEncoder.getCurrentPosition();
         rightEncoderPosition = rightEncoder.getCurrentPosition();
+        middleEncoderPosition = middleEncoder.getCurrentPosition();
 
         double leftChange = leftEncoderPosition - OLDLeftEncoderPosition;
         double rightChange = rightEncoderPosition - OLDRightEncoderPosition;
-        double middleChange = (leftChange + rightChange) / 2;
+        double middleEncoderChange = middleEncoderPosition - OLDMiddleEncoderPosition;
+        double middleChange = (leftChange + rightChange) / 2;//dm
 
         double theta = (rightChange - leftChange) / encoderWheelDistance;
 
-        robotOrientation += theta;
-        globalX = globalX + ((middleChange/theta) * Math.sin(theta) / Math.cos(theta)) * Math.cos(robotOrientation);
-        globalY = globalY + ((middleChange/theta) * Math.sin(theta) / Math.cos(theta)) * Math.sin(robotOrientation);
+
+        if (theta != 0) {
+            globalX = globalX + ((middleChange/theta) * Math.tan(theta)) * Math.cos(robotOrientation + theta/2) + middleEncoderChange * Math.cos(robotOrientation + Math.PI/2 + theta/2);
+            globalY = globalY + ((middleChange/theta) * Math.tan(theta)) * Math.sin(robotOrientation + theta/2) + middleEncoderChange * Math.sin(robotOrientation + Math.PI/2 + theta/2);
+            robotOrientation += theta;
+        }
 
         OLDLeftEncoderPosition = leftEncoderPosition;
         OLDRightEncoderPosition = rightEncoderPosition;
+        OLDMiddleEncoderPosition = middleEncoderPosition;
     }
 
     public void positionUpdate() {
@@ -66,15 +74,15 @@ public class GlobalCoordinateSystemTutorial implements Runnable {
         changeInOrientation = (leftChange - rightChange) / encoderWheelDistance;
         robotOrientation += changeInOrientation;
 
-//        middleEncoderPosition = middleEncoder.getCurrentPosition();
-//        double rawHorizontalChange = middleEncoderPosition - OLDMiddleEncoderPosition;
-//        double horizontalChange = rawHorizontalChange - (changeInOrientation * middleEncoderTickOffset);
+        middleEncoderPosition = middleEncoder.getCurrentPosition();
+        double rawHorizontalChange = middleEncoderPosition - OLDMiddleEncoderPosition;
+        double horizontalChange = rawHorizontalChange - (changeInOrientation * middleEncoderTickOffset);
 
-//        double sides = (rightChange + leftChange) / 2;
-//        double frontBack =  horizontalChange;
+        double sides = (rightChange + leftChange) / 2;
+        double frontBack =  horizontalChange;
 
-//        globalX = sides * Math.sin(robotOrientation) + frontBack * Math.cos(robotOrientation);
-//        globalY = sides * Math.cos(robotOrientation) + frontBack * Math.sin(robotOrientation);
+        globalX = sides * Math.sin(robotOrientation) + frontBack * Math.cos(robotOrientation);
+        globalY = sides * Math.cos(robotOrientation) + frontBack * Math.sin(robotOrientation);
 
         OLDLeftEncoderPosition = leftEncoderPosition;
         OLDRightEncoderPosition = rightEncoderPosition;

@@ -2,6 +2,8 @@ package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
@@ -19,6 +21,10 @@ public class TeleOpSpan extends LinearOpMode {
 
     private final double SHOOT_TIMEOUT = 350;//miliseconds
     private int repetitions = 5;
+
+
+    //Odometrie
+    final double COUNTS_PER_INCH = 194.04;//1440 ticks, 6cm diametru
 
 
     //TODO: regandit functia asta
@@ -41,6 +47,10 @@ public class TeleOpSpan extends LinearOpMode {
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new RobotMap(hardwareMap, this);
+
+        robot.encoderStanga.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.encoderDreapta.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        robot.motorIntake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        robot.zeroPowerBeh();
         runtime = new ElapsedTime();
         runtime.reset();
@@ -51,11 +61,24 @@ public class TeleOpSpan extends LinearOpMode {
 
         while(opModeIsActive()) {
 
+            //Display Global (x, y, theta) coordinates
+            telemetry.addData("X Position", robot.globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
+            telemetry.addData("Y Position", robot.globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
+            telemetry.addData("Orientation (Degrees)", robot.globalPositionUpdate.returnOrientation());
+
+            telemetry.addData("Vertical left encoder position", robot.encoderStanga.getCurrentPosition() * robot.globalPositionUpdate.verticalLeftEncoderPositionMultiplier);
+            telemetry.addData("Vertical right encoder position", robot.encoderDreapta.getCurrentPosition() * robot.globalPositionUpdate.verticalRightEncoderPositionMultiplier);
+            telemetry.addData("horizontal encoder position", robot.motorIntake.getCurrentPosition() * robot.globalPositionUpdate.normalEncoderPositionMultiplier);
+
+            telemetry.addData("Vertical robotEncoderWheelDistance: ", robot.globalPositionUpdate.robotEncoderWheelDistance);
+            telemetry.addData("Thread Active", robot.positionThread.isAlive());
+            telemetry.update();
+
 
             //Fata - spate + rotire
             double forward = -gamepad1.left_stick_y;
             double leftRight = gamepad1.left_stick_x;
-            double rotate = gamepad1.right_stick_x;
+            double rotate = -gamepad1.right_stick_x;
 
             if (robot.motorShooter.getPower() > 0) {
                 rotate /= 4;
@@ -129,9 +152,6 @@ public class TeleOpSpan extends LinearOpMode {
             if (gamepad1.dpad_up) {
                 robot.motorShooter.setPower(1);
             }
-
-            telemetry.addData("Ridicare servo position: ", robot.ridicareShooter.getPosition());
-            telemetry.update();
 
             // Ridicare wobble
             if (gamepad2.y){

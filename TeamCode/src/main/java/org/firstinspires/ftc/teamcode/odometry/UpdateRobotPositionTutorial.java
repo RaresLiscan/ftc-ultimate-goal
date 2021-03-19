@@ -7,17 +7,17 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
-@TeleOp
-//@Disabled
+@TeleOp(name="Odometry test")
+@Disabled
 public class UpdateRobotPositionTutorial extends LinearOpMode {
 
     DcMotor frontLeft, frontRight, backLeft, backRight;
 
-    DcMotor leftEncoder, rightEncoder;
+    DcMotor leftEncoder, rightEncoder, middleEncoder;
     BNO055IMU imu;
 
     static final double TICK_PER_REVOLUTION = 1440;
-    static final double WHEEL_DIAMETER = 100/25.4;
+    static final double WHEEL_DIAMETER = 60/25.4;
     static final double GEAR_RATIO = 1;
 
     static final double TICKS_PER_INCH = WHEEL_DIAMETER * Math.PI * GEAR_RATIO / TICK_PER_REVOLUTION;
@@ -31,9 +31,9 @@ public class UpdateRobotPositionTutorial extends LinearOpMode {
         backLeft = hardwareMap.get(DcMotor.class, "stangaSpate");
         backRight = hardwareMap.get(DcMotor.class, "dreaptaSpate");
 
-        leftEncoder = hardwareMap.dcMotor.get("leftEncoder");
-        rightEncoder = hardwareMap.dcMotor.get("rightEncoder");
-//        middleEncoder = hardwareMap.dcMotor.get("middleEncoder");
+        leftEncoder = hardwareMap.dcMotor.get("encoderStanga");
+        rightEncoder = hardwareMap.dcMotor.get("encoderDreapta");
+        middleEncoder = hardwareMap.dcMotor.get("motorIntake");
 
         frontRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         frontLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -54,20 +54,20 @@ public class UpdateRobotPositionTutorial extends LinearOpMode {
         telemetry.addData("Status: ", "Ready!");
         telemetry.update();
 
-        waitForStart();
-
-        positionUpdate = new GlobalCoordinateSystemTutorial(leftEncoder, rightEncoder, TICKS_PER_INCH, 100);
+        positionUpdate = new GlobalCoordinateSystemTutorial(leftEncoder, rightEncoder, middleEncoder, TICKS_PER_INCH, 100);
         Thread position = new Thread(positionUpdate);
         position.start();
+
+        waitForStart();
 
         while (opModeIsActive()) {
             float left = gamepad1.left_stick_y;
             float right = gamepad1.left_stick_y;
             float rotation = gamepad1.right_stick_x;
 
-            frontLeft.setPower(left + rotation);
+            frontLeft.setPower(left - rotation);
             frontRight.setPower(right + rotation);
-            backLeft.setPower(left + rotation);
+            backLeft.setPower(left - rotation);
             backRight.setPower(right + rotation);
 
             telemetry.addData("X Position: ", positionUpdate.returnXCoordinate() / TICKS_PER_INCH);
@@ -81,10 +81,10 @@ public class UpdateRobotPositionTutorial extends LinearOpMode {
     private void resetOdometryEncoders() {
         leftEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-//        middleEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        middleEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-//        leftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        rightEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-//        middleEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        middleEncoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
 }
