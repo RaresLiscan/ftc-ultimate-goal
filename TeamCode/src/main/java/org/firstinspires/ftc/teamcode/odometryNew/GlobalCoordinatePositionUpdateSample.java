@@ -65,7 +65,6 @@ public class GlobalCoordinatePositionUpdateSample extends LinearOpMode {
         positionThread.start();
         globalPositionUpdate.reverseNormalEncoder();
         globalPositionUpdate.reverseLeftEncoder();
-        double p = 0, n = 0;
 
         while(opModeIsActive()){
 

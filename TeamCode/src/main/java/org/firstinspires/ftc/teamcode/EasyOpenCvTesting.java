@@ -54,7 +54,7 @@ public class EasyOpenCvTesting extends LinearOpMode
     /*
      * The core values which define the location and size of the sample regions
      */
-    public static Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(170,140);
+    public static Point REGION1_TOPLEFT_ANCHOR_POINT = new Point(170,142);
 
     FtcDashboard dashboard;
     Telemetry dashboardTelemetry;
@@ -63,7 +63,7 @@ public class EasyOpenCvTesting extends LinearOpMode
     public static int REGION_HEIGHT = 35;
 
     public static int FOUR_RING_THRESHOLD = 143;
-    public static int ONE_RING_THRESHOLD = 135;
+    public static int ONE_RING_THRESHOLD = 133;
 
     private final double TOWER_GOAL_HEIGHT = 0.55;
 
@@ -138,14 +138,14 @@ public class EasyOpenCvTesting extends LinearOpMode
         robot.motorShooter.setPower(1);
         webcam.closeCameraDevice();
 
-        //Se pozitioneaza la tragere
-        robot.runUsingEncodersLongRun(robot.cmToTicks(150), 1, 3);
-
-
-        //Se pozitioneaza la tower goal
+//        //Se pozitioneaza la tragere
+        robot.runUsingEncodersLongRun(robot.cmToTicks(153), 1, 3);
+//
+//
+//        //Se pozitioneaza la tower goal
         robot.ridicareShooter.setPosition(TOWER_GOAL_HEIGHT);
-        robot.rotateConstantSpeed(-9, 0.3, 3);
-
+        robot.rotate(-6, 0.3, 3);
+//
         robot.lansareRing.setPosition(1);
         sleep(350);
         robot.lansareRing.setPosition(0.5);
@@ -167,28 +167,39 @@ public class EasyOpenCvTesting extends LinearOpMode
 
         startAndShoot();
         //Se pozitioneaza pentru wobble si il duce
-        robot.rotateConstantSpeed(-12, 0.4, 2);
+        robot.rotate(-7, 0.4, 2);
         robot.runUsingEncodersLongRun(robot.cmToTicks(160), 1, 5);
-
-        //lasa primul wobble
+//
+//        //lasa primul wobble
         robot.servoWobble.setPosition(0.8);
-//        robot.servoRidicare.setPosition(1);
+////        robot.servoRidicare.setPosition(1);
         sleep(500);
-
-        //Se intoarce dupa al doilea
-        robot.runUsingEncodersLongRun(robot.cmToTicks(-100), 1, 5);
-        robot.rotateConstantSpeed(-139, 0.4, 3);
-        //Se duce dupa al doilea
-        robot.motorIntake.setPower(-1);
-        robot.runUsingEncodersLongRun(robot.cmToTicks(225),0.75,7);
-        sleep(500);
-        robot.runUsingEncoders(robot.cmToTicks(-155), 1, 4);
+//
+//        //Se intoarce dupa al doilea
+        robot.runUsingEncodersLongRun(robot.cmToTicks(-165), 1, 5);
+        robot.rotate(-114, 0.5, 4);
+//        //Se duce dupa al doilea
+        robot.motorIntake.setPower(1);
+        robot.runUsingEncoders(robot.cmToTicks(160),0.35,7);
+        sleep(200);
+        robot.runUsingEncoders(robot.cmToTicks(5), 0.3, 2);
+        robot.servoWobble.setPosition(0);
+        sleep(800);
+        robot.servoRidicare.setPosition(0);
         robot.motorIntake.setPower(0);
+        robot.runUsingEncodersLongRun(robot.cmToTicks(-175), 1, 4);
+//        robot.motorIntake.setPower(0);
         robot.motorShooter.setPower(1);
-        robot.rotateConstantSpeed(167, 0.5, 3);
+        robot.servoRidicare.setPosition(1);
+        robot.rotate(124, 0.4, 4);
         robot.shoot3Rings();
         robot.motorShooter.setPower(0);
-        robot.runUsingEncoders(robot.cmToTicks(35), 1, 3);
+        robot.rotate(-7, 0.4, 2);
+        robot.runUsingEncodersLongRun(robot.cmToTicks(160), 1, 5);
+        robot.servoWobble.setPosition(0.8);
+        sleep(500);
+        robot.runUsingEncodersLongRun(robot.cmToTicks(-130), 1, 5);
+//        robot.runUsingEncoders(robot.cmToTicks(35), 1, 3);
 //        robot.rotateConstantSpeed(90, 0.4, 2);
 //        robot.servoWobble.setPosition(0);
 //        sleep(500);
@@ -219,9 +230,9 @@ public class EasyOpenCvTesting extends LinearOpMode
         startAndShoot();
 
         //Se pozitioneaza pentru wobble si il duce
-        //robot.runUsingEncoders(robot.cmToTicks(20),1,3);
-        robot.rotateConstantSpeed(-51,0.4,3);
-        robot.runUsingEncoders(robot.cmToTicks(105),1,2);
+        robot.runUsingEncodersLongRun(robot.cmToTicks(20),1,3);
+        robot.rotate(-51,0.4,3);
+        robot.runUsingEncodersLongRun(robot.cmToTicks(90),0.8,2);
 
         //lasa primul wobble
         robot.servoWobble.setPosition(0.8);
@@ -229,31 +240,32 @@ public class EasyOpenCvTesting extends LinearOpMode
         sleep(500);
 
         //Se intoarce dupa al doilea
-        robot.runUsingEncoders(robot.cmToTicks(-35), 1, 2);
-        robot.rotateConstantSpeed(-101, 0.4, 3);
-
-        //Se duce dupa al doilea
-        robot.runUsingEncodersLongRun(robot.cmToTicks(155),1,7);
-
-        //Prinde al doilea wobble
+        robot.runUsingEncodersLongRun(robot.cmToTicks(-35), 0.8, 2);
+        robot.rotate(-95, 0.3, 3);
+//
+//        //Se duce dupa al doilea
+        robot.runUsingEncodersLongRun(robot.cmToTicks(160),1,7);
+//
+//        //Prinde al doilea wobble
         robot.servoWobble.setPosition(0);
         sleep(500);
 //        robot.servoRidicare.setPosition(0.8);
-
-//        //Se intoarce catre patrat
-//        robot.rotateConstantSpeed(160, 0.65, 5);
 //
-//        //Duce al doilea wobble
-        robot.runUsingEncodersLongRun(robot.cmToTicks(-157),1,7);
-        robot.rotateConstantSpeed(90, 0.65, 5);
-        robot.runUsingEncoders(robot.cmToTicks(15),1,3);
+////        //Se intoarce catre patrat
+//        robot.rotateConstantSpeed(160, 0.4, 5);
+////
+////        //Duce al doilea wobble
+        robot.runUsingEncodersLongRun(robot.cmToTicks(-155),1,7);
+        robot.rotate(80, 0.4, 5);
+        robot.runUsingEncoders(robot.cmToTicks(25), 0.8, 2);
+//        robot.runUsingEncoders(robot.cmToTicks(15),1,3);
 
 //
 //
 //        //Lasa al doilea wobble
         robot.servoWobble.setPosition(0.8);
         sleep(500);
-        robot.runUsingEncoders(robot.cmToTicks(-30),1,3);
+        robot.runUsingEncoders(robot.cmToTicks(-50),1,3);
 ////        robot.servoRidicare.setPosition(1);
 //        sleep(500);
 //
@@ -267,48 +279,50 @@ public class EasyOpenCvTesting extends LinearOpMode
         startAndShoot();
 
         //Se pozitioneaza pentru wobble si il duce
-        robot.rotateConstantSpeed(-5,0.4,2);
-        robot.runUsingEncoders(robot.cmToTicks(90),1,2);
-
-        //Lasat primul wobble
+        robot.rotate(-3,0.4,2);
+        robot.runUsingEncodersLongRun(robot.cmToTicks(75),1,2);
+//
+//        //Lasat primul wobble
         robot.servoWobble.setPosition(0.8);
-//        robot.servoRidicare.setPosition(1);
+////        robot.servoRidicare.setPosition(1);
         sleep(500);
-
-        //Mers dupa al doilea wobble
-        robot.runUsingEncoders(robot.cmToTicks(-95),1,2);
-        robot.rotateConstantSpeed(-121,0.4,3);
-        robot.motorIntake.setPower(-1);
-        robot.runUsingEncodersLongRun(robot.cmToTicks(155),1,6);
-
-        //Prinde al doilea wobble
+//
+//        //Mers dupa al doilea wobble
+        robot.runUsingEncodersLongRun(robot.cmToTicks(-85),1,2);
+        robot.rotate(-115,0.35,3);
+        robot.motorIntake.setPower(1);
+        robot.runUsingEncodersLongRun(robot.cmToTicks(135),1,6);
+//
+//        //Prinde al doilea wobble
         robot.servoWobble.setPosition(0);
         sleep(500);
-//        robot.servoRidicare.setPosition(0.8);
+////        robot.servoRidicare.setPosition(0.8);
+////
+////        //Se intoarce catre patrat
+////        robot.rotateConstantSpeed(158, 0.65, 5);
 //
-//        //Se intoarce catre patrat
-//        robot.rotateConstantSpeed(158, 0.65, 5);
-
-        //Duce al doilea wobble
-        robot.motorIntake.setPower(0);
+//        //Duce al doilea wobble
         robot.runUsingEncodersLongRun(robot.cmToTicks(-75),1,7);
-        //Se intoarce catre patrat
-        robot.rotateConstantSpeed(137, 0.6, 5);
+//        //Se intoarce catre patrat
+        robot.rotate(132, 0.4, 5);
         robot.motorShooter.setPower(1);
+        robot.motorIntake.setPower(0);
         robot.runUsingEncodersLongRun(robot.cmToTicks(70),1,7);
         robot.lansareRing.setPosition(1);
         sleep(400);
         robot.lansareRing.setPosition(0.5);
 
-
-        //Lasa al doilea wobble
+        robot.rotate(6, 0.4, 5);
+//
+//
+//        //Lasa al doilea wobble
         robot.runUsingEncodersLongRun(robot.cmToTicks(60),1,7);
         robot.servoWobble.setPosition(0.8);
 //        robot.servoRidicare.setPosition(1);
         sleep(500);
-
-        //Parcare
-        robot.runUsingEncoders(robot.cmToTicks(-30),1,3);
+//
+//        //Parcare
+        robot.runUsingEncoders(robot.cmToTicks(-25),1,3);
 
 
     }

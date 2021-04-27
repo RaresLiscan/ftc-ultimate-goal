@@ -50,7 +50,7 @@ public class TeleOpSpan extends LinearOpMode {
 
         robot.encoderStanga.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         robot.encoderDreapta.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        robot.motorIntake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+//        robot.motorIntake.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 //        robot.zeroPowerBeh();
         runtime = new ElapsedTime();
         runtime.reset();
@@ -62,17 +62,17 @@ public class TeleOpSpan extends LinearOpMode {
         while(opModeIsActive()) {
 
             //Display Global (x, y, theta) coordinates
-            telemetry.addData("X Position", robot.globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
-            telemetry.addData("Y Position", robot.globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
-            telemetry.addData("Orientation (Degrees)", robot.globalPositionUpdate.returnOrientation());
-
-            telemetry.addData("Vertical left encoder position", robot.encoderStanga.getCurrentPosition() * robot.globalPositionUpdate.verticalLeftEncoderPositionMultiplier);
-            telemetry.addData("Vertical right encoder position", robot.encoderDreapta.getCurrentPosition() * robot.globalPositionUpdate.verticalRightEncoderPositionMultiplier);
-            telemetry.addData("horizontal encoder position", robot.motorIntake.getCurrentPosition() * robot.globalPositionUpdate.normalEncoderPositionMultiplier);
-
-            telemetry.addData("Vertical robotEncoderWheelDistance: ", robot.globalPositionUpdate.robotEncoderWheelDistance);
-            telemetry.addData("Thread Active", robot.positionThread.isAlive());
-            telemetry.update();
+//            telemetry.addData("X Position", robot.globalPositionUpdate.returnXCoordinate() / COUNTS_PER_INCH);
+//            telemetry.addData("Y Position", robot.globalPositionUpdate.returnYCoordinate() / COUNTS_PER_INCH);
+//            telemetry.addData("Orientation (Degrees)", robot.globalPositionUpdate.returnOrientation());
+//
+//            telemetry.addData("Vertical left encoder position", robot.encoderStanga.getCurrentPosition() * robot.globalPositionUpdate.verticalLeftEncoderPositionMultiplier);
+//            telemetry.addData("Vertical right encoder position", robot.encoderDreapta.getCurrentPosition() * robot.globalPositionUpdate.verticalRightEncoderPositionMultiplier);
+//            telemetry.addData("horizontal encoder position", robot.motorIntake.getCurrentPosition() * robot.globalPositionUpdate.normalEncoderPositionMultiplier);
+//
+//            telemetry.addData("Vertical robotEncoderWheelDistance: ", robot.globalPositionUpdate.robotEncoderWheelDistance);
+//            telemetry.addData("Thread Active", robot.positionThread.isAlive());
+//            telemetry.update();
 
 
             //Fata - spate + rotire
@@ -109,13 +109,13 @@ public class TeleOpSpan extends LinearOpMode {
                     robot.motorIntake.setPower(0);
                 }
                 else {
-                    robot.motorIntake.setPower(-1);
+                    robot.motorIntake.setPower(1);
                 }
                 runtime.reset();
             }
             if (gamepad2.left_trigger > 0) {
                 robot.motorShooter.setPower(0);
-                robot.motorIntake.setPower(0.4);
+                robot.motorIntake.setPower(-0.4);
                 runtime.reset();
             }
 
@@ -151,6 +151,16 @@ public class TeleOpSpan extends LinearOpMode {
             }
             if (gamepad1.dpad_up) {
                 robot.motorShooter.setPower(1);
+            }
+
+            //ridicare brate
+            if (gamepad2.dpad_right) {
+                robot.servoBratStanga.setPosition(0.5);
+                robot.servoBratDreapta.setPosition(0.5);
+            }
+            if (gamepad2.dpad_left) {
+                robot.servoBratStanga.setPosition(0.1);
+                robot.servoBratDreapta.setPosition(0.9);
             }
 
             // Ridicare wobble

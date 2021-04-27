@@ -38,6 +38,7 @@ public class RobotMap {
     public DcMotor leftEncoder, rightEncoder;
     public Servo servoWobble, servoRidicare, lansareRing = null;
     public Servo ridicareShooter = null;
+    public Servo servoBratStanga = null, servoBratDreapta = null;
     public CRServo rotireIntake = null;
     public DcMotorEx encoderStanga, encoderDreapta;
     public BNO055IMU imu = null;
@@ -61,14 +62,17 @@ public class RobotMap {
         stangaSpate = hardwareMap.get(DcMotorEx.class, "stangaSpate");
         dreaptaSpate = hardwareMap.get(DcMotorEx.class, "dreaptaSpate");
         servoWobble = hardwareMap.get(Servo.class, "servoWobble");
-        servoRidicare = hardwareMap.get(Servo.class, "servoRidicare");
-        lansareRing = hardwareMap.get(Servo.class, "servoIntake");
+        servoRidicare = hardwareMap.get(Servo.class, "servoRidicare"); // ridicare wobble
+        lansareRing = hardwareMap.get(Servo.class, "lansareShooter");
         motorShooter = hardwareMap.get(DcMotor.class, "motorShooter");
         motorIntake = hardwareMap.get(DcMotor.class, "motorIntake");
         ridicareShooter = hardwareMap.servo.get("ridicareShooter");
-        rotireIntake = hardwareMap.crservo.get("rotireIntake");
+//        rotireIntake = hardwareMap.crservo.get("rotireIntake");
         encoderStanga = hardwareMap.get(DcMotorEx.class, "encoderStanga");
         encoderDreapta = hardwareMap.get(DcMotorEx.class, "encoderDreapta");
+        servoBratDreapta = hardwareMap.get(Servo.class, "servoBratDreapta");
+        servoBratStanga = hardwareMap.get(Servo.class, "servoBratStanga");
+
 
         encoderStanga.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         encoderDreapta.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -112,7 +116,7 @@ public class RobotMap {
         rightEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
-    public void runUsingPID(int distance, double power, double timeout) {
+    public void runUsingPID(int distance, double power, double timeout, PIDCoefficients pidCoefficients) {
         dreaptaSpate.setDirection(DcMotorSimple.Direction.REVERSE);
         dreaptaFata.setDirection(DcMotorSimple.Direction.REVERSE);
         double integral = 0;
@@ -134,7 +138,7 @@ public class RobotMap {
 
 //        telemetry.addData("Global error: ", robot.stangaSpate.getCurrentPosition());
 //        telemetry.update();
-        while (Math.abs(globalError) > 100 && runtime.seconds() < timeout) {
+        while (Math.abs(globalError) > 100 && runtime.seconds() < timeout && opMode.opModeIsActive()) {
 //            dashboardTelemetry.addData("Global error: ", globalError);
             errorsSum = 0;
             for (DcMotor motor: motors) {
@@ -218,6 +222,94 @@ public class RobotMap {
             delta *= 0.3;
         }
         teleOpDrive(y, delta);
+    }
+
+    public void odometryPID(int distance, PIDCoefficients pidCoefficients) {
+        dreaptaSpate.setDirection(DcMotorSimple.Direction.REVERSE);
+        dreaptaFata.setDirection(DcMotorSimple.Direction.REVERSE);
+        double integral = 0;
+        ArrayList<DcMotor> motors = new ArrayList<>();
+        motors.add(stangaFata);
+        motors.add(stangaSpate);
+        motors.add(dreaptaSpate);
+        motors.add(dreaptaFata);
+        PIDTimer.reset();
+        runtime.reset();
+
+        for (DcMotor motor: motors) {
+            motor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        }
+
+        double globalError = distance;
+        double errorsSum = 0;
+        double[] lastErrors = new double[5];
+
+//        telemetry.addData("Global error: ", robot.stangaSpate.getCurrentPosition());
+//        telemetry.update();
+        while (Math.abs(globalError) > 100 && opMode.opModeIsActive()) {
+//            dashboardTelemetry.addData("Global error: ", globalError);
+
+//            for (DcMotor motor: motors) {
+//                //Getting the index of the motor
+//                int index = motors.indexOf(motor);
+//
+//                //Calculating the errors of the motor
+//                double error = distance;
+//                double delta = lastErrors[index] - error;
+//
+//                //Calculating the integral and derivative terms
+//                integral += delta * PIDTimer.time();
+//                double derivative = delta/PIDTimer.time();
+//
+//                //Multiplying the errors with the PID coefficients
+//                double P = pidCoefficients.p * error;
+//                double I = pidCoefficients.i * integral;
+//                double D = pidCoefficients.d * derivative;
+//
+//                //Setting the power of the motor
+//                motor.setPower(P + I + D);
+////                telemetry.addData(String.format("Motor %d", motors.indexOf(motor)), motor.getPower());
+//
+//                //Updating the errors and timer for the next loop
+//                lastErrors[index] = error;
+//                errorsSum += error;
+//                PIDTimer.reset();
+//            }
+//            globalError = errorsSum / 4;
+//            telemetry.addData("Updated global error: ", globalError);
+//            telemetry.update();
+        }
+        dreaptaSpate.setDirection(DcMotorSimple.Direction.FORWARD);
+        dreaptaFata.setDirection(DcMotorSimple.Direction.FORWARD);
+    }
+
+    public void odometryDrive(double forward, double rotate) {
+
+        double frontLeftSpeed = (forward - rotate);
+        double frontRightSpeed = (-forward - rotate);
+        double backLeftSpeed = (forward - rotate);
+        double backRightSpeed = (-forward - rotate);
+
+        setSpeeds(frontLeftSpeed, frontRightSpeed, backLeftSpeed, backRightSpeed);
+    }
+
+    public void odometryMovementTest(double power, double angle) {
+        double angle_in = Math.toRadians(angle);  // convert to robot coordinates
+
+        double delta = normalizeRadians(Math.toRadians(globalPositionUpdate.returnOrientation()) - angle_in);
+
+//        double MAX_ROTATE = 0.3; //This is to shrink how fast we can rotate so we don't fly past the angle
+//        if (y <= 0.05) {
+//            delta = 0;
+//        }
+//        else if (y < 0.5) {
+//            y /= 1.5;
+//            delta *= 0.3;
+//        }
+//        else {
+//            delta *= 0.3;
+//        }
+        odometryDrive(power, delta);
     }
 
 
@@ -314,6 +406,7 @@ public class RobotMap {
 
     //Used for robot travels longer than 2500 ticks
     public void runUsingEncodersLongRun (int distance, double power, double timeout) {
+        double coefficient = 2000;
         ElapsedTime runtime = new ElapsedTime();
 
         stangaSpate.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -334,36 +427,38 @@ public class RobotMap {
         dreaptaFata.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         double p = 0.05;
-
-        stangaFata.setPower(p);
-        stangaSpate.setPower(p);
-        dreaptaFata.setPower(p);
-        dreaptaSpate.setPower(p);
+//        stangaFata.setPower(p);
+//        stangaSpate.setPower(p);
+//        dreaptaFata.setPower(p);
+//        dreaptaSpate.setPower(p);
 
         runtime.reset();
 
         boolean accelerate = true;
-        double minPower = p/3;
+        double minPower = 0.25;
 
         while (opMode.opModeIsActive() && stangaSpate.isBusy() && stangaFata.isBusy() && dreaptaSpate.isBusy() && dreaptaFata.isBusy() && runtime.seconds() < timeout) {
             if (p < power && accelerate) p += 0.025;
 
-            stangaFata.setPower(p);
-            stangaSpate.setPower(p);
-            dreaptaFata.setPower(p);
-            dreaptaSpate.setPower(p);
+            stangaFata.setVelocity(p * coefficient);
+            stangaSpate.setVelocity(p * coefficient);
+            dreaptaFata.setVelocity(p * coefficient);
+            dreaptaSpate.setVelocity(p * coefficient);
 
-            if ((Math.abs(distance - stangaSpate.getCurrentPosition()) < cmToTicks(40) ||
-                Math.abs(distance - stangaFata.getCurrentPosition()) < cmToTicks(40) ||
-                Math.abs(distance - dreaptaFata.getCurrentPosition()) < cmToTicks(40) ||
-                Math.abs(distance - dreaptaSpate.getCurrentPosition()) < cmToTicks(40)) && accelerate)
+            if ((Math.abs(distance) - Math.abs(stangaSpate.getCurrentPosition()) < cmToTicks(45) ||
+                Math.abs(distance) - Math.abs(stangaFata.getCurrentPosition()) < cmToTicks(45) ||
+                Math.abs(distance) - Math.abs(dreaptaFata.getCurrentPosition()) < cmToTicks(45) ||
+                Math.abs(distance) - Math.abs(dreaptaSpate.getCurrentPosition()) < cmToTicks(45)) && accelerate)
             {
                 if (p > minPower && accelerate) {
-                    p -= 0.03;
+                    p -= 0.065;
                 }
                 else {
                     accelerate = false;
                 }
+            }
+            else if (accelerate == false) {
+                p = minPower;
             }
         }
 
@@ -372,7 +467,7 @@ public class RobotMap {
     }
 
     public int cmToTicks(double cm) {
-        return (int)(cm / (Math.PI * 10) * 1120);
+        return (int)(cm / (Math.PI * 9) * 560);
     }
 
     public void shoot3Rings() {
@@ -414,10 +509,12 @@ public class RobotMap {
     public void rotateConstantSpeed(int degrees, double power, int timeout)
     {
 
-        dreaptaFata.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        stangaFata.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        dreaptaSpate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        stangaSpate.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        dreaptaFata.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        stangaFata.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        dreaptaSpate.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        stangaSpate.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+
 
         ElapsedTime runtime = new ElapsedTime();
 
@@ -433,10 +530,10 @@ public class RobotMap {
 //            dreaptaSpate.setPower(-power);
 //            stangaSpate.setPower(power);
 //            dreaptaFata.setPower(-power);
-            power = -power;
         }
         else if (degrees > 0)
         {   // turn left.
+            power = -power;
 //            stangaFata.setPower(power);
 //            dreaptaSpate.setPower(-power);
 //            stangaSpate.setPower(power);
@@ -489,29 +586,34 @@ public class RobotMap {
 
         if (degrees < 0)
         {   // turn right.
-            stangaFata.setPower(power);
-            dreaptaSpate.setPower(-power);
-            stangaSpate.setPower(power);
-            dreaptaFata.setPower(-power);
-            power = -power;
+//            stangaFata.setPower(power);
+//            dreaptaSpate.setPower(-power);
+//            stangaSpate.setPower(power);
+//            dreaptaFata.setPower(-power);
         }
         else if (degrees > 0)
         {   // turn left.
-            stangaFata.setPower(power);
-            dreaptaSpate.setPower(-power);
-            stangaSpate.setPower(power);
-            dreaptaFata.setPower(-power);
-
-
+//            stangaFata.setPower(power);
+//            dreaptaSpate.setPower(-power);
+//            stangaSpate.setPower(power);
+//            dreaptaFata.setPower(-power);
+            power = -power;
         }
         else return;
 
 
         // set power to rotate.
-        stangaFata.setPower(power);
-        dreaptaFata.setPower(power);
-        stangaSpate.setPower(power);
-        dreaptaSpate.setPower(power);
+//        stangaFata.setPower(power);
+//        dreaptaFata.setPower(power);
+//        stangaSpate.setPower(power);
+//        dreaptaSpate.setPower(power);
+
+        double coefficient = 1500;
+
+        dreaptaFata.setVelocity(power * coefficient);
+        stangaSpate.setVelocity(power * coefficient);
+        dreaptaSpate.setVelocity(power * coefficient);
+        stangaFata.setVelocity(power * coefficient);
 
 
         //        leftMotor.setPower(leftPower);

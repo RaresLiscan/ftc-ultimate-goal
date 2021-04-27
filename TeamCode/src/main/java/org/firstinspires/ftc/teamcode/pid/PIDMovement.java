@@ -45,7 +45,7 @@ public class PIDMovement {
 
 
         double globalError = getError(errorsArray);
-        while (Math.abs(globalError) <= 9 && repetitions < 40) {
+        while (Math.abs(globalError) <= 9) {
             for (int i = 0; i < 4; i ++) {
                 double error = motors[i].getCurrentPosition() - targetPosition;
                 errorsArray[i] = error;
@@ -57,11 +57,14 @@ public class PIDMovement {
                 double D = pidCoefficients.d * derivative;
                 motors[i].setPower(P + I + D);
                 lastErrors[i] = error;
-                repetitions++;
+//                repetitions++;
                 PIDTimer.reset();
             }
         }
 
+        for (int i = 0; i < 4; i ++) {
+            motors[i].setPower(0);
+        }
     }
 
 }
